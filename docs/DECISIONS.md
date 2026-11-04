@@ -1,0 +1,27 @@
+# Decisions log
+
+Newest first. Each entry: what, why, and what it rules out. Reversible decisions can be revisited; record the change here when they are.
+
+## 2026-11-04
+
+**D-010 · Dark theme only for the MVP.** One well-tuned theme beats two half-tuned ones; the instructions require excellent contrast in both if both exist. `color-scheme: dark` is declared. Revisit in stage 7 with accent themes.
+
+**D-009 · Self-hosted fonts via Fontsource.** No request to Google Fonts (privacy, no third-party in the CSP, fewer connections on first load). Latin subsets of Atkinson Hyperlegible 400/700 and Bricolage Grotesque variable (weight axis only).
+
+**D-008 · Typefaces: Bricolage Grotesque (display/UI) + Atkinson Hyperlegible (chat and body).** Bricolage gives the playful, slightly cheeky voice; Atkinson was built for legibility, which matters most in message text. Non-Latin scripts fall back to system fonts.
+
+**D-007 · Duo colour system.** Each participant owns a colour — Marigold `#FFC24B` for the viewer, Lagoon `#8FD3FF` for the other person — on a Pine `#102A26` base. Rejected: a near-black + coral accent proposal (generic), and purple gradients (instructions §4.1). Colour never carries meaning alone: names, labels and icons accompany it.
+
+**D-006 · Activity answers are hidden until both people answer.** Prevents copying and makes the reveal the fun moment. Must be enforced by the server in stage 6 (the partner's answer is not sent to the client until both exist), not just hidden in the UI.
+
+**D-005 · Styling: Tailwind CSS v4 on CSS-variable tokens, Radix primitives only where accessibility is hard (dialog, toast).** No component kit, to keep the bundle lean and the look our own.
+
+**D-004 · Linting with oxlint (from the Vite template) instead of ESLint.** Much faster, already configured with React-hooks rules; no reason to replace it.
+
+**D-003 · Tooling stays lean:** zod is not used on the always-loaded path (env checks are plain code) — it saved ~30 KB gzip. Zod remains available for form and API validation in lazy routes.
+
+**D-002 · Hosting: Vercel (frontend) + Supabase in Mumbai (`ap-south-1`).** Free tiers cover the MVP; upgrade later if needed. Decided by product owner.
+
+**D-001 · Authentication: email OTP / magic link via Supabase Auth (PKCE).** No passwords to store or leak; recovery = access to the email. Decided by product owner.
+
+**D-000 · Greenfield repo.** No existing code was found, so no architecture needed preserving.
