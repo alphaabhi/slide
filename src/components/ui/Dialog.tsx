@@ -30,7 +30,7 @@ export function Dialog({
         <RadixDialog.Overlay className="slide-overlay fixed inset-0 z-40 bg-black/60" />
         <RadixDialog.Content
           className={cn(
-            'slide-sheet fixed z-50 border border-line bg-pine-raised shadow-[var(--shadow-overlay)] focus:outline-none',
+            'slide-sheet fixed z-50 border border-line bg-surface shadow-[var(--shadow-overlay)] focus:outline-none',
             'inset-x-0 bottom-0 max-h-[90dvh] overflow-y-auto rounded-t-card px-gutter pt-3 pb-safe',
             'md:inset-x-auto md:top-1/2 md:bottom-auto md:left-1/2 md:w-[28rem] md:-translate-x-1/2 md:-translate-y-1/2 md:rounded-card md:p-6',
           )}
@@ -43,7 +43,7 @@ export function Dialog({
             <div>
               <RadixDialog.Title className="text-xl">{title}</RadixDialog.Title>
               {description ? (
-                <RadixDialog.Description className="mt-1 text-sm text-moss">
+                <RadixDialog.Description className="mt-1 text-sm text-fg-muted">
                   {description}
                 </RadixDialog.Description>
               ) : null}

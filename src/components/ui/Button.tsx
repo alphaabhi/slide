@@ -11,10 +11,10 @@ const base =
   'active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100'
 
 const variants: Record<ButtonVariant, string> = {
-  primary: 'bg-you text-you-ink hover:bg-[#ffcd6b]',
-  secondary: 'bg-pine-raised text-mist border border-line hover:bg-pine-high',
-  ghost: 'bg-transparent text-mist hover:bg-pine-raised',
-  danger: 'bg-danger-surface text-danger border border-danger/40 hover:bg-[#4a2c27]',
+  primary: 'bg-you text-you-ink hover:bg-you-hover',
+  secondary: 'bg-surface text-fg border border-line hover:bg-surface-high',
+  ghost: 'bg-transparent text-fg hover:bg-surface',
+  danger: 'bg-danger-surface text-danger border border-danger/40 hover:bg-danger-hover',
 }
 
 const sizes: Record<ButtonSize, string> = {

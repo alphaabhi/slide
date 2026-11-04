@@ -61,12 +61,15 @@ export function ActivityCard({
   return (
     <section
       aria-label={kindLabel[kind]}
-      className="relative overflow-hidden rounded-card border border-line bg-pine-raised p-5 shadow-[var(--shadow-raised)]"
+      className="relative overflow-hidden rounded-card border border-line bg-surface p-5 shadow-[var(--shadow-raised)]"
     >
       <div className="flex items-center justify-between gap-3">
-        <p className="font-display text-sm font-semibold text-moss">{kindLabel[kind]}</p>
+        <p className="inline-flex items-center gap-1.5 font-display text-sm font-semibold text-gold">
+          <Icon name="sparkle" size={14} />
+          {kindLabel[kind]}
+        </p>
         {onSkip && !revealed ? (
-          <Button variant="ghost" size="sm" onClick={onSkip} className="-mr-3 text-moss">
+          <Button variant="ghost" size="sm" onClick={onSkip} className="-mr-3 text-fg-muted">
             <Icon name="skip" size={16} />
             Skip
           </Button>
@@ -97,7 +100,7 @@ export function ActivityCard({
                 !youPicked && theyPicked && 'border-them bg-them text-them-ink',
                 !youPicked &&
                   !theyPicked &&
-                  'border-line bg-pine text-mist enabled:hover:border-moss',
+                  'border-line bg-base text-fg enabled:hover:border-fg-muted',
                 yourChoice && !youPicked && !theyPicked && 'opacity-55',
               )}
             >
@@ -124,7 +127,7 @@ export function ActivityCard({
         })}
       </div>
 
-      <p className="mt-4 text-sm text-moss" aria-live="polite">
+      <p className="mt-4 text-sm text-fg-muted" aria-live="polite">
         {statusText}
       </p>
     </section>

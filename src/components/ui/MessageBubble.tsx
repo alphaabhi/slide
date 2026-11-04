@@ -48,13 +48,13 @@ export const MessageBubble = memo(function MessageBubble({
       <div
         className={cn(
           'slide-bubble max-w-[min(80%,34rem)] whitespace-pre-wrap rounded-bubble px-4 py-2.5 text-base [overflow-wrap:anywhere]',
-          mine ? 'bg-you text-you-ink' : 'bg-pine-high text-mist',
+          mine ? 'bg-you text-you-ink' : 'bg-surface-high text-fg',
           isLast &&
             (mine
               ? 'rounded-br-[var(--radius-bubble-tail)]'
               : 'rounded-bl-[var(--radius-bubble-tail)]'),
           status === 'sending' && 'opacity-70',
-          failed && 'bg-danger-surface text-mist outline outline-1 outline-danger/60',
+          failed && 'bg-danger-surface text-fg outline outline-1 outline-danger/60',
         )}
       >
         {body}
@@ -64,7 +64,7 @@ export const MessageBubble = memo(function MessageBubble({
         <div
           className={cn(
             'mt-1 flex items-center gap-2 px-1 text-xs',
-            failed ? 'text-danger' : 'text-moss',
+            failed ? 'text-danger' : 'text-fg-muted',
           )}
         >
           <time dateTime={dateTime}>{time}</time>
@@ -82,7 +82,7 @@ export const MessageBubble = memo(function MessageBubble({
             <button
               type="button"
               onClick={onRetry}
-              className="-my-3 ml-1 inline-flex h-[var(--touch-target)] items-center gap-1 rounded-pill px-2 font-semibold text-mist underline decoration-danger underline-offset-4 hover:text-white"
+              className="-my-3 ml-1 inline-flex h-[var(--touch-target)] items-center gap-1 rounded-pill px-2 font-semibold text-fg underline decoration-danger underline-offset-4 hover:text-white"
             >
               <Icon name="retry" size={14} />
               Retry

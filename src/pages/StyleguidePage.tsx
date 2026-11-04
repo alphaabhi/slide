@@ -20,16 +20,22 @@ import { Wordmark } from '@/components/Wordmark'
  */
 
 const swatches = [
-  { name: 'Pine', token: '--color-pine', hex: '#102A26', role: 'Background' },
-  { name: 'Pine raised', token: '--color-pine-raised', hex: '#173832', role: 'Cards, composer' },
-  { name: 'Pine high', token: '--color-pine-high', hex: '#1F463F', role: 'Their bubbles, hover' },
-  { name: 'Line', token: '--color-line', hex: '#2C554D', role: 'Borders' },
-  { name: 'Mist', token: '--color-mist', hex: '#E8EFEA', role: 'Text' },
-  { name: 'Moss', token: '--color-moss', hex: '#9DB3AB', role: 'Secondary text' },
-  { name: 'Marigold', token: '--color-you', hex: '#FFC24B', role: 'You' },
-  { name: 'Lagoon', token: '--color-them', hex: '#8FD3FF', role: 'Them' },
-  { name: 'Danger', token: '--color-danger', hex: '#FF8A7A', role: 'Errors' },
-  { name: 'Success', token: '--color-success', hex: '#8BE0B4', role: 'Confirmations' },
+  { name: 'Black', token: '--color-base', hex: '#0A0A0B', role: 'Background' },
+  { name: 'Surface', token: '--color-surface', hex: '#161618', role: 'Cards, composer' },
+  {
+    name: 'Surface high',
+    token: '--color-surface-high',
+    hex: '#222225',
+    role: 'Their bubbles, hover',
+  },
+  { name: 'Line', token: '--color-line', hex: '#333338', role: 'Borders' },
+  { name: 'White', token: '--color-fg', hex: '#FAFAF7', role: 'Text' },
+  { name: 'Grey', token: '--color-fg-muted', hex: '#A6A6AD', role: 'Secondary text' },
+  { name: 'Coral', token: '--color-you', hex: '#FF9B8A', role: 'You, primary actions' },
+  { name: 'Blue', token: '--color-them', hex: '#A8CDFF', role: 'Them' },
+  { name: 'Dark yellow', token: '--color-gold', hex: '#D9A21B', role: 'Highlights, focus' },
+  { name: 'Danger', token: '--color-danger', hex: '#FF6B7D', role: 'Errors' },
+  { name: 'Success', token: '--color-success', hex: '#9EE6C1', role: 'Confirmations' },
 ]
 
 const typeScale = [
@@ -59,20 +65,21 @@ export default function StyleguidePage() {
       <header className="py-10">
         <Wordmark className="text-3xl" />
         <h1 className="mt-4 text-3xl">Design system</h1>
-        <p className="mt-2 max-w-[52ch] text-moss">
-          Two colours, one for each person. Everything else stays quiet so the conversation leads.
+        <p className="mt-2 max-w-[52ch] text-fg-muted">
+          Black, with pastel coral for you and pastel blue for them. Dark yellow marks the fun
+          moments.
         </p>
       </header>
 
       <Section title="Colour">
-        <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+        <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
           {swatches.map((s) => (
             <li key={s.token} className="overflow-hidden rounded-[1rem] border border-line">
               <div className="h-16" style={{ background: `var(${s.token})` }} />
-              <div className="bg-pine-raised p-3">
+              <div className="bg-surface p-3">
                 <p className="font-display font-semibold">{s.name}</p>
-                <p className="text-xs text-moss">{s.role}</p>
-                <p className="mt-1 text-xs text-moss">{s.hex}</p>
+                <p className="text-xs text-fg-muted">{s.role}</p>
+                <p className="mt-1 text-xs text-fg-muted">{s.hex}</p>
               </div>
             </li>
           ))}
@@ -83,14 +90,14 @@ export default function StyleguidePage() {
         <div className="space-y-4">
           {typeScale.map((t) => (
             <div key={t.cls} className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:gap-6">
-              <span className="w-24 shrink-0 text-xs text-moss">{t.label}</span>
+              <span className="w-24 shrink-0 text-xs text-fg-muted">{t.label}</span>
               <span className={`${t.cls} font-display font-[650] tracking-[-0.02em]`}>
                 {t.sample}
               </span>
             </div>
           ))}
           <div className="flex flex-col gap-1 sm:flex-row sm:gap-6">
-            <span className="w-24 shrink-0 text-xs text-moss">body / 16px</span>
+            <span className="w-24 shrink-0 text-xs text-fg-muted">body / 16px</span>
             <p className="max-w-[60ch]">
               Atkinson Hyperlegible carries every message. It was designed for low-vision readers,
               so similar letters like I, l and 1 never blur together in a fast conversation. नमस्ते
@@ -142,7 +149,7 @@ export default function StyleguidePage() {
       </Section>
 
       <Section title="Messages">
-        <Card className="mx-auto max-w-md bg-pine p-4">
+        <Card className="mx-auto max-w-md bg-base p-4">
           <MessageBubble
             side="them"
             body="ok this is way better than the hinge chat"

@@ -2,9 +2,9 @@ import { forwardRef, useId, type InputHTMLAttributes, type TextareaHTMLAttribute
 import { cn } from '@/lib/cn'
 
 const control =
-  'w-full rounded-md border bg-pine-raised px-4 text-base text-mist placeholder:text-moss/80 ' +
+  'w-full rounded-md border bg-surface px-4 text-base text-fg placeholder:text-fg-muted/80 ' +
   'transition-[border-color,box-shadow] duration-[var(--duration-fast)] ' +
-  'focus:outline-none focus-visible:outline-none focus:border-you focus:shadow-[0_0_0_3px_rgb(255_194_75/0.25)] ' +
+  'focus:outline-none focus-visible:outline-none focus:border-you focus:shadow-[0_0_0_3px_color-mix(in_srgb,var(--color-you)_30%,transparent)] ' +
   'disabled:opacity-50'
 
 interface FieldShellProps {
@@ -19,7 +19,7 @@ interface FieldShellProps {
 function FieldShell({ id, label, hideLabel, hint, error, children }: FieldShellProps) {
   return (
     <div className="flex flex-col gap-2">
-      <label htmlFor={id} className={cn('text-sm font-semibold text-mist', hideLabel && 'sr-only')}>
+      <label htmlFor={id} className={cn('text-sm font-semibold text-fg', hideLabel && 'sr-only')}>
         {label}
       </label>
       {children}
@@ -29,7 +29,7 @@ function FieldShell({ id, label, hideLabel, hint, error, children }: FieldShellP
           {error}
         </p>
       ) : hint ? (
-        <p id={`${id}-hint`} className="text-sm text-moss">
+        <p id={`${id}-hint`} className="text-sm text-fg-muted">
           {hint}
         </p>
       ) : null}

@@ -52,7 +52,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               if (!open) setItems((prev) => prev.filter((p) => p.id !== t.id))
             }}
             className={cn(
-              'slide-toast flex items-start gap-3 rounded-card border bg-pine-raised p-4 shadow-[var(--shadow-overlay)]',
+              'slide-toast flex items-start gap-3 rounded-card border bg-surface p-4 shadow-[var(--shadow-overlay)]',
               t.tone === 'danger' ? 'border-danger/50' : 'border-line',
             )}
           >
@@ -61,7 +61,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
                 'mt-0.5',
                 t.tone === 'success' && 'text-success',
                 t.tone === 'danger' && 'text-danger',
-                t.tone === 'neutral' && 'text-you',
+                t.tone === 'neutral' && 'text-gold',
               )}
             >
               <Icon name={toneIcon[t.tone]} />
@@ -69,14 +69,14 @@ export function ToastProvider({ children }: { children: ReactNode }) {
             <div className="min-w-0 flex-1">
               <RadixToast.Title className="font-display font-semibold">{t.title}</RadixToast.Title>
               {t.description ? (
-                <RadixToast.Description className="mt-0.5 text-sm text-moss">
+                <RadixToast.Description className="mt-0.5 text-sm text-fg-muted">
                   {t.description}
                 </RadixToast.Description>
               ) : null}
             </div>
             <RadixToast.Close
               aria-label="Dismiss"
-              className="-m-2 inline-flex size-[var(--touch-target)] items-center justify-center rounded-full text-moss hover:text-mist"
+              className="-m-2 inline-flex size-[var(--touch-target)] items-center justify-center rounded-full text-fg-muted hover:text-fg"
             >
               <Icon name="close" size={18} />
             </RadixToast.Close>

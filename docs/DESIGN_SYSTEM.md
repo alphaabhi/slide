@@ -4,24 +4,25 @@ Source: `src/design/tokens.css`. Live reference: `/styleguide`.
 
 ## Idea
 
-SLIDE is for exactly two people, so the identity is a **duo**: each person owns a colour, and the space is where they meet. Marigold is always _you_ (the viewer); Lagoon is always _them_. Everything else is quiet pine green so the conversation leads.
+SLIDE is for exactly two people. The base is black; each person owns a pastel: **coral is always _you_** (the viewer, and every primary action), **blue is always _them_**. **Dark yellow** marks the fun moments (activity labels, highlights) and is the keyboard focus ring. White carries the text.
 
 ## Colour
 
-| Token                         | Hex               | Use                                          |
-| ----------------------------- | ----------------- | -------------------------------------------- |
-| `pine`                        | #102A26           | Background                                   |
-| `pine-raised`                 | #173832           | Cards, sheets, composer                      |
-| `pine-high`                   | #1F463F           | Their bubbles, hover                         |
-| `line`                        | #2C554D           | Borders, dividers                            |
-| `mist`                        | #E8EFEA           | Primary text                                 |
-| `moss`                        | #9DB3AB           | Secondary text                               |
-| `you` / `you-ink`             | #FFC24B / #2A1D00 | The viewer: bubbles, avatar, primary buttons |
-| `them` / `them-ink`           | #8FD3FF / #04263A | The other person                             |
-| `danger` / `danger-surface`   | #FF8A7A / #3A2622 | Errors, failed messages                      |
-| `success` / `success-surface` | #8BE0B4 / #1B3B2F | Confirmations                                |
+| Token                                        | Hex                         | Use                                                          |
+| -------------------------------------------- | --------------------------- | ------------------------------------------------------------ |
+| `base`                                       | #0A0A0B                     | Background (black)                                           |
+| `surface`                                    | #161618                     | Cards, sheets, composer                                      |
+| `surface-high`                               | #222225                     | Their bubbles, hover                                         |
+| `line`                                       | #333338                     | Borders, dividers                                            |
+| `fg`                                         | #FAFAF7                     | Primary text (white)                                         |
+| `fg-muted`                                   | #A6A6AD                     | Secondary text                                               |
+| `you` / `you-hover` / `you-ink`              | #FF9B8A / #FFAD9F / #3B0E06 | Pastel coral: the viewer, primary buttons                    |
+| `them` / `them-ink`                          | #A8CDFF / #0B2244           | Pastel blue: the other person                                |
+| `gold` / `gold-ink`                          | #D9A21B / #2B1F00           | Dark yellow: highlights, activities, focus ring              |
+| `danger` / `danger-surface` / `danger-hover` | #FF6B7D / #2E1418 / #3D1A20 | Errors, failed messages (rose-red, kept distinct from coral) |
+| `success` / `success-surface`                | #9EE6C1 / #142A20           | Confirmations (pastel mint)                                  |
 
-All text pairs pass WCAG AA (checked by axe in CI). Status is never shown by colour alone.
+Token names are theme-neutral (`base`, `surface`, `fg`) so the palette can change without renaming classes. All text pairs pass WCAG AA (axe in CI). Status is never shown by colour alone — failed messages always show an icon and "Not sent".
 
 ## Type
 
@@ -40,7 +41,7 @@ All text pairs pass WCAG AA (checked by axe in CI). Status is never shown by col
 
 Durations 120 / 200 / 360 ms, ease-out `cubic-bezier(0.22,1,0.36,1)`. Only transform and opacity are animated. Durations collapse to 0 under `prefers-reduced-motion`.
 
-Signature moments: bubbles _slide_ in from their sender's side; the activity reveal fills a shared pick half Marigold, half Lagoon. Nothing animates on its own unprompted.
+Signature moments: bubbles _slide_ in from their sender's side; the activity reveal fills a shared pick half coral, half blue. Nothing animates on its own unprompted.
 
 ## Components
 

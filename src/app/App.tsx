@@ -19,7 +19,7 @@ const queryClient = new QueryClient({
 
 function PageFallback() {
   return (
-    <div className="grid min-h-dvh place-items-center text-moss">
+    <div className="grid min-h-dvh place-items-center text-fg-muted">
       <Spinner label="Loading" className="size-6" />
     </div>
   )

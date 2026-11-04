@@ -17,8 +17,8 @@
 
   body {
     margin: 0;
-    background-color: var(--color-pine);
-    color: var(--color-mist);
+    background-color: var(--color-base);
+    color: var(--color-fg);
     font-family: var(--font-body);
     font-size: var(--text-base);
     line-height: var(--text-base--line-height);

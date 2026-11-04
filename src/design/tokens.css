@@ -5,26 +5,30 @@
  */
 
 @theme {
-  /* ---------- Colour: base ---------- */
-  --color-pine: #102a26; /* app background */
-  --color-pine-raised: #173832; /* cards, sheets, composer */
-  --color-pine-high: #1f463f; /* hover/pressed surfaces, their bubbles */
-  --color-line: #2c554d; /* borders, dividers */
-  --color-mist: #e8efea; /* primary text */
-  --color-moss: #9db3ab; /* secondary text (≥ 4.5:1 on pine) */
+  /* ---------- Colour: base (black) ---------- */
+  --color-base: #0a0a0b; /* app background */
+  --color-surface: #161618; /* cards, sheets, composer */
+  --color-surface-high: #222225; /* their bubbles, hover/pressed surfaces */
+  --color-line: #333338; /* borders, dividers */
+  --color-fg: #fafaf7; /* primary text (white) */
+  --color-fg-muted: #a6a6ad; /* secondary text (>= 4.5:1 on base and surface) */
 
-  /* ---------- Colour: the duo ---------- */
-  --color-you: #ffc24b; /* Marigold — the current viewer */
-  --color-you-ink: #2a1d00; /* text on Marigold */
-  --color-them: #8fd3ff; /* Lagoon — the other person */
-  --color-them-ink: #04263a; /* text on Lagoon */
+  /* ---------- Colour: pastel accents ---------- */
+  --color-you: #ff9b8a; /* pastel coral — the viewer, primary actions */
+  --color-you-hover: #ffad9f;
+  --color-you-ink: #3b0e06; /* text on coral */
+  --color-them: #a8cdff; /* pastel blue — the other person */
+  --color-them-ink: #0b2244; /* text on blue */
+  --color-gold: #d9a21b; /* dark yellow — highlights, activity moments, focus */
+  --color-gold-ink: #2b1f00;
 
   /* ---------- Colour: semantic states ---------- */
-  --color-danger: #ff8a7a;
-  --color-danger-surface: #3a2622;
-  --color-success: #8be0b4;
-  --color-success-surface: #1b3b2f;
-  --color-focus: #ffffff;
+  --color-danger: #ff6b7d; /* rose-red: distinct from coral, always paired with an icon + label */
+  --color-danger-surface: #2e1418;
+  --color-danger-hover: #3d1a20;
+  --color-success: #9ee6c1; /* pastel mint */
+  --color-success-surface: #142a20;
+  --color-focus: #d9a21b; /* gold focus ring, visible on black and on coral/blue fills */
 
   /* ---------- Typography ---------- */
   --font-display: 'Bricolage Grotesque Variable', ui-sans-serif, system-ui, sans-serif;

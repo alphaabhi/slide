@@ -4,13 +4,15 @@ Newest first. Each entry: what, why, and what it rules out. Reversible decisions
 
 ## 2026-11-04
 
+**D-011 · Palette changed to black + pastels (supersedes D-007's colours).** Product owner rejected the pine/marigold/lagoon palette. New direction, decided by the product owner: black base; pastel coral `#FF9B8A` = you and primary actions; pastel blue `#A8CDFF` = them; dark yellow `#D9A21B` for highlights and the focus ring; white text. The "duo" idea (each person owns a colour) is kept. Danger moved to rose-red `#FF6B7D` so errors aren't confused with your coral bubbles. Colour tokens renamed to theme-neutral names (`base`, `surface`, `surface-high`, `fg`, `fg-muted`, `gold`).
+
 **D-010 · Dark theme only for the MVP.** One well-tuned theme beats two half-tuned ones; the instructions require excellent contrast in both if both exist. `color-scheme: dark` is declared. Revisit in stage 7 with accent themes.
 
 **D-009 · Self-hosted fonts via Fontsource.** No request to Google Fonts (privacy, no third-party in the CSP, fewer connections on first load). Latin subsets of Atkinson Hyperlegible 400/700 and Bricolage Grotesque variable (weight axis only).
 
 **D-008 · Typefaces: Bricolage Grotesque (display/UI) + Atkinson Hyperlegible (chat and body).** Bricolage gives the playful, slightly cheeky voice; Atkinson was built for legibility, which matters most in message text. Non-Latin scripts fall back to system fonts.
 
-**D-007 · Duo colour system.** Each participant owns a colour — Marigold `#FFC24B` for the viewer, Lagoon `#8FD3FF` for the other person — on a Pine `#102A26` base. Rejected: a near-black + coral accent proposal (generic), and purple gradients (instructions §4.1). Colour never carries meaning alone: names, labels and icons accompany it.
+**D-007 · Duo colour system.** _(Colours superseded by D-011; the duo concept stands.)_ Each participant owns a colour — Marigold `#FFC24B` for the viewer, Lagoon `#8FD3FF` for the other person — on a Pine `#102A26` base. Rejected: a near-black + coral accent proposal (generic), and purple gradients (instructions §4.1). Colour never carries meaning alone: names, labels and icons accompany it.
 
 **D-006 · Activity answers are hidden until both people answer.** Prevents copying and makes the reveal the fun moment. Must be enforced by the server in stage 6 (the partner's answer is not sent to the client until both exist), not just hidden in the UI.
 
