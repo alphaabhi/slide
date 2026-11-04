@@ -19,7 +19,7 @@ export function Wordmark({ className }: { className?: string }) {
         aria-hidden="true"
         className="relative mx-[0.04em] inline-block h-[0.72em] w-[0.22em] self-center"
       >
-        <span className="absolute top-0 left-0 h-[55%] w-full rounded-[0.08em] bg-you" />
+        <span className="absolute top-0 left-0 h-[55%] w-full rounded-[0.08em] bg-you-fill" />
         <span className="absolute bottom-0 left-0 h-[55%] w-full translate-y-[8%] rounded-[0.08em] bg-them" />
       </span>
       <span aria-hidden="true">DE</span>

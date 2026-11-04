@@ -11,9 +11,10 @@ const base =
   'active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100'
 
 const variants: Record<ButtonVariant, string> = {
-  primary: 'bg-you text-you-ink hover:bg-you-hover',
+  primary:
+    'bg-you-fill text-you-ink shadow-[0_8px_24px_-10px_var(--color-you)] hover:brightness-110',
   secondary: 'bg-surface text-fg border border-line hover:bg-surface-high',
-  ghost: 'bg-transparent text-fg hover:bg-surface',
+  ghost: 'bg-transparent text-fg hover:bg-surface-high',
   danger: 'bg-danger-surface text-danger border border-danger/40 hover:bg-danger-hover',
 }
 

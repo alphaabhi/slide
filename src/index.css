@@ -15,9 +15,14 @@
     min-height: 100dvh;
   }
 
+  html {
+    background-color: var(--color-base);
+  }
+
   body {
     margin: 0;
-    background-color: var(--color-base);
+    position: relative;
+    isolation: isolate;
     color: var(--color-fg);
     font-family: var(--font-body);
     font-size: var(--text-base);
@@ -27,12 +32,22 @@
     -webkit-tap-highlight-color: transparent;
   }
 
+  /* The theme's backdrop, fixed behind everything (works on iOS, unlike background-attachment: fixed). */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background: var(--app-bg);
+    pointer-events: none;
+  }
+
   h1,
   h2,
   h3,
   h4 {
     font-family: var(--font-display);
-    font-weight: 650;
+    font-weight: var(--heading-weight);
     letter-spacing: -0.02em;
     text-wrap: balance;
   }
@@ -51,6 +66,29 @@
     outline: 2px solid var(--color-focus);
     outline-offset: 3px;
   }
+}
+
+/* Theme-aware surfaces and fills */
+@utility surface-glass {
+  background-color: var(--color-surface);
+  box-shadow: var(--surface-highlight), var(--shadow-raised);
+  -webkit-backdrop-filter: blur(var(--surface-blur)) saturate(140%);
+  backdrop-filter: blur(var(--surface-blur)) saturate(140%);
+}
+@utility bg-you-fill {
+  background-color: var(--color-you);
+  background-image: var(--you-fill);
+}
+/* Small labels: uppercase + tracked in Violet, monospace sentence case in Graphite */
+@utility label-meta {
+  font-family: var(--label-font);
+  text-transform: var(--label-transform);
+  letter-spacing: var(--label-tracking);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+@utility font-meta {
+  font-family: var(--meta-font);
 }
 
 @layer utilities {

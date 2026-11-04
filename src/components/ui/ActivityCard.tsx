@@ -61,10 +61,10 @@ export function ActivityCard({
   return (
     <section
       aria-label={kindLabel[kind]}
-      className="relative overflow-hidden rounded-card border border-line bg-surface p-5 shadow-[var(--shadow-raised)]"
+      className="relative overflow-hidden rounded-card border border-line surface-glass p-5"
     >
       <div className="flex items-center justify-between gap-3">
-        <p className="inline-flex items-center gap-1.5 font-display text-sm font-semibold text-gold">
+        <p className="label-meta inline-flex items-center gap-1.5 text-gold">
           <Icon name="sparkle" size={14} />
           {kindLabel[kind]}
         </p>
@@ -95,12 +95,12 @@ export function ActivityCard({
                 'enabled:active:scale-[0.98] disabled:cursor-default',
                 youPicked &&
                   theyPicked &&
-                  'border-you bg-[linear-gradient(100deg,var(--color-you)_0_50%,var(--color-them)_50%_100%)] text-you-ink',
-                youPicked && !theyPicked && 'border-you bg-you text-you-ink',
+                  'border-glow bg-you-fill text-you-ink shadow-[0_0_28px_-6px_var(--color-glow)]',
+                youPicked && !theyPicked && 'border-you bg-you-fill text-you-ink',
                 !youPicked && theyPicked && 'border-them bg-them text-them-ink',
                 !youPicked &&
                   !theyPicked &&
-                  'border-line bg-base text-fg enabled:hover:border-fg-muted',
+                  'border-line bg-surface-high/40 text-fg enabled:hover:border-fg-muted',
                 yourChoice && !youPicked && !theyPicked && 'opacity-55',
               )}
             >
@@ -115,7 +115,7 @@ export function ActivityCard({
                   <span
                     className={cn(
                       'rounded-pill px-2 py-0.5 text-xs font-bold',
-                      youPicked ? 'bg-them-ink/15 text-them-ink' : 'bg-them-ink/15',
+                      youPicked ? 'bg-them text-them-ink' : 'bg-them-ink/15',
                     )}
                   >
                     {themName}

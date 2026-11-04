@@ -12,7 +12,9 @@ import {
   Textarea,
   useToast,
 } from '@/components/ui'
+import { ThemeSwitch } from '@/components/ThemeSwitch'
 import { Wordmark } from '@/components/Wordmark'
+import { SpacePreview } from './styleguide/SpacePreview'
 
 /**
  * Living style guide: every token and component in one place, rendered with real
@@ -20,22 +22,18 @@ import { Wordmark } from '@/components/Wordmark'
  */
 
 const swatches = [
-  { name: 'Black', token: '--color-base', hex: '#0A0A0B', role: 'Background' },
-  { name: 'Surface', token: '--color-surface', hex: '#161618', role: 'Cards, composer' },
-  {
-    name: 'Surface high',
-    token: '--color-surface-high',
-    hex: '#222225',
-    role: 'Their bubbles, hover',
-  },
-  { name: 'Line', token: '--color-line', hex: '#333338', role: 'Borders' },
-  { name: 'White', token: '--color-fg', hex: '#FAFAF7', role: 'Text' },
-  { name: 'Grey', token: '--color-fg-muted', hex: '#A6A6AD', role: 'Secondary text' },
-  { name: 'Coral', token: '--color-you', hex: '#FF9B8A', role: 'You, primary actions' },
-  { name: 'Blue', token: '--color-them', hex: '#A8CDFF', role: 'Them' },
-  { name: 'Dark yellow', token: '--color-gold', hex: '#D9A21B', role: 'Highlights, focus' },
-  { name: 'Danger', token: '--color-danger', hex: '#FF6B7D', role: 'Errors' },
-  { name: 'Success', token: '--color-success', hex: '#9EE6C1', role: 'Confirmations' },
+  { name: 'Base', token: '--color-base', role: 'Background' },
+  { name: 'Surface', token: '--color-surface', role: 'Cards, composer' },
+  { name: 'Surface high', token: '--color-surface-high', role: 'Their bubbles, hover' },
+  { name: 'Line', token: '--color-line', role: 'Borders' },
+  { name: 'Text', token: '--color-fg', role: 'Primary text' },
+  { name: 'Muted', token: '--color-fg-muted', role: 'Secondary text' },
+  { name: 'You', token: '--color-you', role: 'You, primary actions' },
+  { name: 'Them', token: '--color-them', role: 'The other person' },
+  { name: 'Gold', token: '--color-gold', role: 'Labels, focus' },
+  { name: 'Glow', token: '--color-glow', role: 'Reveals, highlights' },
+  { name: 'Danger', token: '--color-danger', role: 'Errors' },
+  { name: 'Success', token: '--color-success', role: 'Confirmations' },
 ]
 
 const typeScale = [
@@ -63,23 +61,34 @@ export default function StyleguidePage() {
   return (
     <main className="mx-auto max-w-5xl px-gutter pt-safe pb-20">
       <header className="py-10">
-        <Wordmark className="text-3xl" />
-        <h1 className="mt-4 text-3xl">Design system</h1>
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <Wordmark className="text-3xl" />
+          <ThemeSwitch />
+        </div>
+        <h1 className="mt-6 text-3xl">Design system</h1>
         <p className="mt-2 max-w-[52ch] text-fg-muted">
-          Black, with pastel coral for you and pastel blue for them. Dark yellow marks the fun
-          moments.
+          Two themes on the same components. Violet is a glowing purple with frosted cards; Graphite
+          is near-black with hairline borders and small colour accents.
         </p>
       </header>
+
+      <Section title="In a space">
+        <SpacePreview />
+      </Section>
 
       <Section title="Colour">
         <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
           {swatches.map((s) => (
             <li key={s.token} className="overflow-hidden rounded-[1rem] border border-line">
-              <div className="h-16" style={{ background: `var(${s.token})` }} />
-              <div className="bg-surface p-3">
+              <div
+                className="h-16"
+                style={{
+                  background: s.token === '--color-you' ? 'var(--you-fill)' : `var(${s.token})`,
+                }}
+              />
+              <div className="surface-glass p-3">
                 <p className="font-display font-semibold">{s.name}</p>
                 <p className="text-xs text-fg-muted">{s.role}</p>
-                <p className="mt-1 text-xs text-fg-muted">{s.hex}</p>
               </div>
             </li>
           ))}
@@ -149,7 +158,7 @@ export default function StyleguidePage() {
       </Section>
 
       <Section title="Messages">
-        <Card className="mx-auto max-w-md bg-base p-4">
+        <Card className="mx-auto max-w-md p-4">
           <MessageBubble
             side="them"
             body="ok this is way better than the hinge chat"
@@ -159,13 +168,13 @@ export default function StyleguidePage() {
           />
           <MessageBubble
             side="them"
-            body="what’s the yellow thing"
+            body="wait, we get our own colours?"
             time="9:38 pm"
             dateTime="2026-11-04T21:38:00+05:30"
           />
           <MessageBubble
             side="you"
-            body="that’s me. you’re blue. very official"
+            body="yep. you’re the other one. very official"
             time="9:40 pm"
             dateTime="2026-11-04T21:40:00+05:30"
             status="sent"

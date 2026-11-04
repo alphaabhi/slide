@@ -52,7 +52,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               if (!open) setItems((prev) => prev.filter((p) => p.id !== t.id))
             }}
             className={cn(
-              'slide-toast flex items-start gap-3 rounded-card border bg-surface p-4 shadow-[var(--shadow-overlay)]',
+              'slide-toast flex items-start gap-3 rounded-card border surface-glass p-4 [--color-surface:color-mix(in_srgb,var(--color-base)_92%,transparent)]',
               t.tone === 'danger' ? 'border-danger/50' : 'border-line',
             )}
           >

@@ -5,33 +5,35 @@
  */
 
 @theme {
-  /* ---------- Colour: base (black) ---------- */
-  --color-base: #0a0a0b; /* app background */
-  --color-surface: #161618; /* cards, sheets, composer */
-  --color-surface-high: #222225; /* their bubbles, hover/pressed surfaces */
-  --color-line: #333338; /* borders, dividers */
-  --color-fg: #fafaf7; /* primary text (white) */
-  --color-fg-muted: #a6a6ad; /* secondary text (>= 4.5:1 on base and surface) */
+  /* ---------- Colour ----------
+   * Defaults below are the VIOLET theme. The GRAPHITE theme overrides the same
+   * variables at the bottom of this file. Names are theme-neutral on purpose.
+   */
+  --color-base: #1b0c4a; /* solid fallback behind the app gradient */
+  --color-surface: rgb(24 13 72 / 0.62); /* frosted cards, sheets, composer */
+  --color-surface-high: rgb(255 255 255 / 0.1); /* their bubbles, hover */
+  --color-line: rgb(255 255 255 / 0.14); /* borders, dividers */
+  --color-fg: #ffffff;
+  --color-fg-muted: #d8cff8;
 
-  /* ---------- Colour: pastel accents ---------- */
-  --color-you: #ff9b8a; /* pastel coral — the viewer, primary actions */
-  --color-you-hover: #ffad9f;
-  --color-you-ink: #3b0e06; /* text on coral */
-  --color-them: #a8cdff; /* pastel blue — the other person */
-  --color-them-ink: #0b2244; /* text on blue */
-  --color-gold: #d9a21b; /* dark yellow — highlights, activity moments, focus */
+  --color-you: #5a58f2; /* the viewer: bubbles, primary actions */
+  --color-you-ink: #ffffff;
+  --color-them: #e4dbff; /* the other person */
+  --color-them-ink: #26105f;
+  --color-gold: #ffcf5c; /* highlights, activity labels */
   --color-gold-ink: #2b1f00;
+  --color-glow: #e9a8ff; /* the one bright moment: reveals, highlights */
 
-  /* ---------- Colour: semantic states ---------- */
-  --color-danger: #ff6b7d; /* rose-red: distinct from coral, always paired with an icon + label */
-  --color-danger-surface: #2e1418;
-  --color-danger-hover: #3d1a20;
-  --color-success: #9ee6c1; /* pastel mint */
-  --color-success-surface: #142a20;
-  --color-focus: #d9a21b; /* gold focus ring, visible on black and on coral/blue fills */
+  --color-danger: #ff8aa0;
+  --color-danger-surface: rgb(120 20 60 / 0.45);
+  --color-danger-hover: rgb(140 25 70 / 0.55);
+  --color-success: #8ef0bf;
+  --color-success-surface: rgb(20 90 60 / 0.4);
+  --color-focus: #ffcf5c;
 
   /* ---------- Typography ---------- */
-  --font-display: 'Bricolage Grotesque Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Plus Jakarta Sans Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, monospace;
   --font-body: 'Atkinson Hyperlegible', ui-sans-serif, system-ui, 'Noto Sans', sans-serif;
 
   /* Modular scale, ratio ~1.25, base 16px */
@@ -64,8 +66,8 @@
   --radius-pill: 999px; /* buttons */
 
   /* ---------- Elevation: dark UI uses light borders + deep shadows ---------- */
-  --shadow-raised: 0 1px 0 0 rgb(255 255 255 / 0.04) inset, 0 8px 24px -12px rgb(0 0 0 / 0.55);
-  --shadow-overlay: 0 1px 0 0 rgb(255 255 255 / 0.06) inset, 0 24px 64px -16px rgb(0 0 0 / 0.7);
+  --shadow-raised: 0 12px 32px -16px rgb(0 0 0 / 0.55);
+  --shadow-overlay: 0 24px 64px -16px rgb(0 0 0 / 0.7);
 
   /* ---------- Breakpoints (mobile-first) ---------- */
   --breakpoint-sm: 30rem; /* 480 — large phones */
@@ -86,6 +88,55 @@
   --control-height: 3rem; /* 48px buttons/inputs */
   --composer-max: 40rem;
   --content-max: 42rem;
+
+  /* Theme-level treatments (VIOLET defaults) */
+  --app-bg:
+    radial-gradient(90% 55% at 50% -8%, rgb(138 77 255 / 0.5) 0%, transparent 70%),
+    radial-gradient(70% 45% at 100% 30%, rgb(120 70 255 / 0.35) 0%, transparent 70%),
+    linear-gradient(180deg, #3a1a9c 0%, #24106a 38%, #1b0c4a 100%);
+  --you-fill: linear-gradient(135deg, #5262f2 0%, #6e4cf5 100%);
+  --surface-blur: 18px;
+  --surface-highlight: inset 0 1px 0 0 rgb(255 255 255 / 0.12);
+  --heading-weight: 750;
+  --label-transform: uppercase;
+  --label-tracking: 0.08em;
+  --label-font: var(--font-body);
+  --meta-font: var(--font-body);
+}
+
+/* ---------- GRAPHITE theme: near-black, hairline borders, small colour accents ---------- */
+:root[data-theme='graphite'] {
+  --color-base: #0c0c0d;
+  --color-surface: #151516;
+  --color-surface-high: #202022;
+  --color-line: #29292c;
+  --color-fg: #ededee;
+  --color-fg-muted: #929298;
+
+  --color-you: #f1f1f2;
+  --color-you-ink: #111112;
+  --color-them: #7fb0ff;
+  --color-them-ink: #08193a;
+  --color-gold: #f5c542;
+  --color-gold-ink: #2b1f00;
+  --color-glow: #f472b6;
+
+  --color-danger: #ff7b8a;
+  --color-danger-surface: #2a1417;
+  --color-danger-hover: #36191d;
+  --color-success: #5fdc9a;
+  --color-success-surface: #12261b;
+  --color-focus: #f5c542;
+
+  --app-bg: radial-gradient(80% 40% at 50% -10%, #1c1c1f 0%, transparent 70%), #0c0c0d;
+  --you-fill: linear-gradient(#f1f1f2, #f1f1f2);
+  --surface-blur: 0px;
+  --surface-highlight: inset 0 1px 0 0 rgb(255 255 255 / 0.03);
+  --heading-weight: 550;
+  --label-transform: none;
+  --label-tracking: 0;
+  --label-font: var(--font-mono);
+  --meta-font: var(--font-mono);
 }
 
 @media (prefers-reduced-motion: reduce) {

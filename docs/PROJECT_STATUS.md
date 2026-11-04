@@ -38,7 +38,7 @@ _Last updated: 2026-11-04_
 
 ## Waiting on the product owner
 
-1. Sign off the re-themed style guide (black + pastels).
+1. Choose Violet, Graphite, or both (as a user setting).
 2. Create the GitHub repo, Supabase project (Mumbai, `ap-south-1`) and Vercel project — step-by-step guide to follow.
 
 ## Next

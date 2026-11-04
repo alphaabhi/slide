@@ -3,12 +3,6 @@ import { cn } from '@/lib/cn'
 
 export function Card({ className, ...rest }: HTMLAttributes<HTMLDivElement>) {
   return (
-    <div
-      className={cn(
-        'rounded-card border border-line bg-surface p-5 shadow-[var(--shadow-raised)]',
-        className,
-      )}
-      {...rest}
-    />
+    <div className={cn('rounded-card border border-line surface-glass p-5', className)} {...rest} />
   )
 }
