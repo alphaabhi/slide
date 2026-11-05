@@ -1,5 +1,9 @@
 # Architecture
 
+## Platform
+
+A mobile-first **web app** (React SPA), installable to the home screen as a PWA from stage 8. Native iOS/Android apps are deferred until the web version proves itself (DECISIONS D-014). The Supabase backend, schema, RLS policies and feature logic are platform-independent and would be reused by a Capacitor wrapper or a React Native app.
+
 ## Overview
 
 ```

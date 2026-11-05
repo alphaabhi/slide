@@ -6,7 +6,7 @@ import { ActivityCard, Avatar, Button, Icon, MessageBubble } from '@/components/
  */
 export function SpacePreview() {
   return (
-    <div className="mx-auto w-full max-w-[24rem] overflow-hidden rounded-[2rem] border border-line surface-glass">
+    <div className="mx-auto w-full max-w-[24rem] overflow-hidden rounded-[2rem] border border-line surface-panel">
       <div className="flex items-center gap-3 border-b border-line px-4 py-3">
         <div className="flex -space-x-2">
           <Avatar name="Abhi" side="you" size="sm" className="ring-2 ring-[var(--color-base)]" />

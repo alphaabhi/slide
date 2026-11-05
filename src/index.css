@@ -47,7 +47,7 @@
   h3,
   h4 {
     font-family: var(--font-display);
-    font-weight: var(--heading-weight);
+    font-weight: 550;
     letter-spacing: -0.02em;
     text-wrap: balance;
   }
@@ -68,27 +68,21 @@
   }
 }
 
-/* Theme-aware surfaces and fills */
-@utility surface-glass {
+/* Raised panel: cards, sheets, toasts */
+@utility surface-panel {
   background-color: var(--color-surface);
-  box-shadow: var(--surface-highlight), var(--shadow-raised);
-  -webkit-backdrop-filter: blur(var(--surface-blur)) saturate(140%);
-  backdrop-filter: blur(var(--surface-blur)) saturate(140%);
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 255 255 / 0.03),
+    var(--shadow-raised);
 }
-@utility bg-you-fill {
-  background-color: var(--color-you);
-  background-image: var(--you-fill);
-}
-/* Small labels: uppercase + tracked in Violet, monospace sentence case in Graphite */
+/* Small labels and timestamps use the monospace face, sentence case */
 @utility label-meta {
-  font-family: var(--label-font);
-  text-transform: var(--label-transform);
-  letter-spacing: var(--label-tracking);
+  font-family: var(--font-mono);
   font-size: 0.75rem;
   font-weight: 700;
 }
 @utility font-meta {
-  font-family: var(--meta-font);
+  font-family: var(--font-mono);
 }
 
 @layer utilities {

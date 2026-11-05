@@ -24,7 +24,7 @@ Viewports: iPhone SE (375×667), Pixel 7 (412×915), tablet 768×1024, desktop 1
 Environment: Linux sandbox, Node 22, headless Chrome (system), production build served by `vite preview`.
 
 - `npm run check`: pass (9 unit tests).
-- Playwright: **56/56 pass** across 4 viewports × 2 themes (Violet, Graphite):
+- Playwright: **32/32 pass** across 4 viewports (Graphite theme, 2026-11-05):
   - `/`, `/styleguide`, unknown route render with no console errors and no horizontal overflow.
   - No serious/critical axe violations (includes colour contrast) on all three pages.
   - Every button on the style guide is at least 44×44 px.

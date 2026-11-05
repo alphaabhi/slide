@@ -51,7 +51,7 @@ export const MessageBubble = memo(function MessageBubble({
           failed
             ? 'bg-danger-surface text-fg outline outline-1 outline-danger/60'
             : mine
-              ? 'bg-you-fill text-you-ink'
+              ? 'bg-you text-you-ink'
               : 'bg-surface-high text-fg',
           isLast &&
             (mine

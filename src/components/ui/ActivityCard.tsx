@@ -61,7 +61,7 @@ export function ActivityCard({
   return (
     <section
       aria-label={kindLabel[kind]}
-      className="relative overflow-hidden rounded-card border border-line surface-glass p-5"
+      className="relative overflow-hidden rounded-card border border-line surface-panel p-5"
     >
       <div className="flex items-center justify-between gap-3">
         <p className="label-meta inline-flex items-center gap-1.5 text-gold">
@@ -95,8 +95,8 @@ export function ActivityCard({
                 'enabled:active:scale-[0.98] disabled:cursor-default',
                 youPicked &&
                   theyPicked &&
-                  'border-glow bg-you-fill text-you-ink shadow-[0_0_28px_-6px_var(--color-glow)]',
-                youPicked && !theyPicked && 'border-you bg-you-fill text-you-ink',
+                  'border-glow bg-you text-you-ink shadow-[0_0_28px_-6px_var(--color-glow)]',
+                youPicked && !theyPicked && 'border-you bg-you text-you-ink',
                 !youPicked && theyPicked && 'border-them bg-them text-them-ink',
                 !youPicked &&
                   !theyPicked &&

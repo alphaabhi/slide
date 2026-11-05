@@ -12,7 +12,6 @@ import {
   Textarea,
   useToast,
 } from '@/components/ui'
-import { ThemeSwitch } from '@/components/ThemeSwitch'
 import { Wordmark } from '@/components/Wordmark'
 import { SpacePreview } from './styleguide/SpacePreview'
 
@@ -61,14 +60,11 @@ export default function StyleguidePage() {
   return (
     <main className="mx-auto max-w-5xl px-gutter pt-safe pb-20">
       <header className="py-10">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <Wordmark className="text-3xl" />
-          <ThemeSwitch />
-        </div>
+        <Wordmark className="text-3xl" />
         <h1 className="mt-6 text-3xl">Design system</h1>
         <p className="mt-2 max-w-[52ch] text-fg-muted">
-          Two themes on the same components. Violet is a glowing purple with frosted cards; Graphite
-          is near-black with hairline borders and small colour accents.
+          Graphite: near-black, hairline borders and small colour accents. White is you, blue is
+          them, gold marks the fun moments.
         </p>
       </header>
 
@@ -83,10 +79,10 @@ export default function StyleguidePage() {
               <div
                 className="h-16"
                 style={{
-                  background: s.token === '--color-you' ? 'var(--you-fill)' : `var(${s.token})`,
+                  background: `var(${s.token})`,
                 }}
               />
-              <div className="surface-glass p-3">
+              <div className="surface-panel p-3">
                 <p className="font-display font-semibold">{s.name}</p>
                 <p className="text-xs text-fg-muted">{s.role}</p>
               </div>

@@ -6,10 +6,6 @@ import './index.css'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { App } from './app/App'
-import { applyTheme, readTheme } from './design/theme'
-
-// Apply before first render so there is no flash of the wrong theme.
-applyTheme(readTheme())
 
 const root = document.getElementById('root')
 if (!root) throw new Error('Root element missing')

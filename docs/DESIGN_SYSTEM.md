@@ -4,27 +4,31 @@ Source: `src/design/tokens.css`. Live reference: `/styleguide`.
 
 ## Idea
 
-SLIDE is for exactly two people: each person owns a colour (you / them) and everything else stays quiet so the conversation leads. The look follows the product owner's reference and ships as **two themes** on identical components. One will be chosen (or both offered as a user setting).
+SLIDE is for exactly two people: each person owns a colour and everything else stays quiet so the conversation leads. The look is **Graphite**, from the product owner's reference: near-black, hairline borders, small colour accents, monospace meta text. (A purple "Violet" theme was explored and set aside — see DECISIONS D-012/D-013.)
 
-|                   | Violet (default)                                                      | Graphite                                           |
-| ----------------- | --------------------------------------------------------------------- | -------------------------------------------------- |
-| Backdrop          | Purple gradient with a soft top glow                                  | Near-black `#0C0C0D`                               |
-| Surfaces          | Frosted glass: translucent `rgb(24 13 72 / .62)` + 18px backdrop blur | Solid `#151516`, hairline `#29292C` borders        |
-| You               | Indigo→violet gradient `#5262F2→#6E4CF5`, white text                  | White `#F1F1F2`, near-black text                   |
-| Them              | Lilac `#E4DBFF` (avatars, picks); bubbles are translucent white       | Blue `#7FB0FF` (avatars, picks); bubbles `#202022` |
-| Accents           | Gold `#FFCF5C` labels, pink-lilac `#E9A8FF` glow on reveals           | Gold `#F5C542` labels, pink `#F472B6` glow         |
-| Labels            | Uppercase, tracked                                                    | Monospace, sentence case                           |
-| Meta (timestamps) | Body font                                                             | Monospace                                          |
-| Heading weight    | 750                                                                   | 550                                                |
+## Colour
 
-Switching: `src/design/theme.ts` sets `data-theme` on `<html>` before first render. `?theme=graphite` previews a theme; the choice is saved per browser. Theme tokens live in `src/design/tokens.css` (`@theme` = Violet defaults, `:root[data-theme='graphite']` = overrides). Utilities: `surface-glass`, `bg-you-fill`, `label-meta`, `font-meta`.
+| Token                                        | Hex                         | Use                                               |
+| -------------------------------------------- | --------------------------- | ------------------------------------------------- |
+| `base`                                       | #0C0C0D                     | Background (with a faint top light, `--app-bg`)   |
+| `surface`                                    | #151516                     | Cards, sheets, composer (`surface-panel` utility) |
+| `surface-high`                               | #202022                     | Their bubbles, hover                              |
+| `line`                                       | #29292C                     | Hairline borders, dividers                        |
+| `fg`                                         | #EDEDEE                     | Primary text                                      |
+| `fg-muted`                                   | #929298                     | Secondary text                                    |
+| `you` / `you-ink`                            | #F1F1F2 / #111112           | The viewer: bubbles, avatar, primary buttons      |
+| `them` / `them-ink`                          | #7FB0FF / #08193A           | The other person                                  |
+| `gold` / `gold-ink`                          | #F5C542 / #2B1F00           | Activity labels, badges, focus ring               |
+| `glow`                                       | #F472B6                     | The one bright moment: a shared activity pick     |
+| `danger` / `danger-surface` / `danger-hover` | #FF7B8A / #2A1417 / #36191D | Errors, failed messages                           |
+| `success` / `success-surface`                | #5FDC9A / #12261B           | Confirmations                                     |
 
-Contrast: every text pair is ≥ 4.5:1, including Violet's translucent surfaces computed against the brightest part of the backdrop (muted text on the top glow: 4.9:1; white on the you-gradient: 5.1:1). axe checks run on both themes in CI.
+Token names are theme-neutral, so accent themes (stage 7 personalisation) can be added by overriding variables. All text pairs pass WCAG AA (axe in CI). Status is never shown by colour alone — failed messages always show an icon and "Not sent".
 
 ## Type
 
-- **Plus Jakarta Sans** (variable): headings, buttons, labels. Heading weight is set per theme; tracking −0.02em.
-- **System monospace**: labels and timestamps in Graphite.
+- **Plus Jakarta Sans** (variable): headings and buttons. Headings weight 550, tracking −0.02em.
+- **System monospace**: small labels (`label-meta`) and timestamps (`font-meta`), sentence case.
 - **Atkinson Hyperlegible**: messages and body. Never below 16px in inputs (prevents iOS zoom).
 - Scale (~1.25): 13 / 15 / 16 / 20 / 25 / 32 / 44 / 64 px.
 
