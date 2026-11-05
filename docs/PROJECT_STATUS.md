@@ -63,7 +63,7 @@ Animations, loading moments and emoji that make onboarding and activities feel p
 
 ## Live
 
-Production (Vercel): https://slide-three-xi.vercel.app — deployed 2026-11-05 from `main`.
+Production: **https://slidedm.space** (Vercel, from `main`). `www.slidedm.space` redirects (308) to it; `slide-three-xi.vercel.app` also still serves production.
 
 ## Platform
 
