@@ -40,7 +40,11 @@ afterAll(async () => {
   await template.close()
 })
 
-async function rpc<T = Record<string, unknown>>(user: string | null, fn: string, args: unknown[] = []) {
+async function rpc<T = Record<string, unknown>>(
+  user: string | null,
+  fn: string,
+  args: unknown[] = [],
+) {
   await as(db, user)
   const params = args.map((_, i) => `$${i + 1}`).join(', ')
   const { rows } = await db.query<{ r: T }>(`select public.${fn}(${params}) as r`, args)
@@ -60,9 +64,9 @@ describe('create_space', () => {
   it('creates a space with you as the only member and a 43-character invite token', async () => {
     const { space_id, invite_token } = await newSpace()
     expect(invite_token).toMatch(/^[A-Za-z0-9_-]{43}$/)
-    expect(await rows(OWNER, 'select user_id from public.space_members where space_id = $1', [space_id])).toEqual([
-      { user_id: OWNER },
-    ])
+    expect(
+      await rows(OWNER, 'select user_id from public.space_members where space_id = $1', [space_id]),
+    ).toEqual([{ user_id: OWNER }])
   })
 
   it('stores only a hash of the token, never the token itself', async () => {
@@ -84,9 +88,9 @@ describe('create_space', () => {
       { title: 'late night chats' },
     ])
     const untitled = await newSpace('   ')
-    expect(await rows(OWNER, 'select title from public.spaces where id = $1', [untitled.space_id])).toEqual([
-      { title: null },
-    ])
+    expect(
+      await rows(OWNER, 'select title from public.spaces where id = $1', [untitled.space_id]),
+    ).toEqual([{ title: null }])
   })
 
   it('rejects a title over 60 characters', async () => {
@@ -108,7 +112,11 @@ describe('get_invitation (join page preview)', () => {
   it('shows who invited you, even before you sign in', async () => {
     const { invite_token } = await newSpace()
     const preview = await rpc(null, 'get_invitation', [invite_token])
-    expect(preview).toMatchObject({ status: 'valid', inviter_name: 'Abhi', space_title: 'Not the Hinge chat' })
+    expect(preview).toMatchObject({
+      status: 'valid',
+      inviter_name: 'Abhi',
+      space_title: 'Not the Hinge chat',
+    })
     expect(preview).not.toHaveProperty('space_id')
   })
 
@@ -128,11 +136,17 @@ describe('get_invitation (join page preview)', () => {
 describe('accept_invitation', () => {
   it('lets one other person join; both see the space and each other’s names', async () => {
     const { space_id, invite_token } = await newSpace()
-    expect(await rpc(PARTNER, 'accept_invitation', [invite_token])).toEqual({ space_id, already_member: false })
+    expect(await rpc(PARTNER, 'accept_invitation', [invite_token])).toEqual({
+      space_id,
+      already_member: false,
+    })
 
     for (const user of [OWNER, PARTNER]) {
       expect(await rows(user, 'select id from public.spaces')).toEqual([{ id: space_id }])
-      const names = await rows(user, 'select display_name from public.profiles order by display_name')
+      const names = await rows(
+        user,
+        'select display_name from public.profiles order by display_name',
+      )
       expect(names).toEqual([{ display_name: 'Abhi' }, { display_name: 'Meera' }])
     }
   })
@@ -150,7 +164,10 @@ describe('accept_invitation', () => {
     await rpc(PARTNER, 'accept_invitation', [invite_token])
     await asAdmin(db)
     await expect(
-      db.query('insert into public.space_members (space_id, user_id) values ($1, $2)', [space_id, THIRD]),
+      db.query('insert into public.space_members (space_id, user_id) values ($1, $2)', [
+        space_id,
+        THIRD,
+      ]),
     ).rejects.toThrow(/space_full/)
   })
 
@@ -162,8 +179,13 @@ describe('accept_invitation', () => {
   it('is safe to tap twice', async () => {
     const { space_id, invite_token } = await newSpace()
     await rpc(PARTNER, 'accept_invitation', [invite_token])
-    expect(await rpc(PARTNER, 'accept_invitation', [invite_token])).toEqual({ space_id, already_member: true })
-    expect(await rows(OWNER, 'select count(*)::int as n from public.space_members')).toEqual([{ n: 2 }])
+    expect(await rpc(PARTNER, 'accept_invitation', [invite_token])).toEqual({
+      space_id,
+      already_member: true,
+    })
+    expect(await rows(OWNER, 'select count(*)::int as n from public.space_members')).toEqual([
+      { n: 2 },
+    ])
   })
 
   it('rejects expired links', async () => {
@@ -171,28 +193,40 @@ describe('accept_invitation', () => {
     await asAdmin(db)
     await db.query(`update public.invitations set expires_at = now() - interval '1 minute'`)
     expect(await rpc(PARTNER, 'get_invitation', [invite_token])).toEqual({ status: 'expired' })
-    await expect(rpc(PARTNER, 'accept_invitation', [invite_token])).rejects.toThrow(/invite_expired/)
+    await expect(rpc(PARTNER, 'accept_invitation', [invite_token])).rejects.toThrow(
+      /invite_expired/,
+    )
   })
 
   it('rejects revoked links', async () => {
     const { space_id, invite_token } = await newSpace()
     await rpc(OWNER, 'revoke_invitation', [space_id])
     expect(await rpc(PARTNER, 'get_invitation', [invite_token])).toEqual({ status: 'revoked' })
-    await expect(rpc(PARTNER, 'accept_invitation', [invite_token])).rejects.toThrow(/invite_revoked/)
+    await expect(rpc(PARTNER, 'accept_invitation', [invite_token])).rejects.toThrow(
+      /invite_revoked/,
+    )
   })
 
   it('rejects made-up links and requires a display name', async () => {
     await expect(rpc(PARTNER, 'accept_invitation', ['nope'])).rejects.toThrow(/invite_not_found/)
     const { invite_token } = await newSpace()
-    await expect(rpc(NONAME, 'accept_invitation', [invite_token])).rejects.toThrow(/profile_required/)
-    await expect(rpc(null, 'accept_invitation', [invite_token])).rejects.toThrow(/permission denied/)
+    await expect(rpc(NONAME, 'accept_invitation', [invite_token])).rejects.toThrow(
+      /profile_required/,
+    )
+    await expect(rpc(null, 'accept_invitation', [invite_token])).rejects.toThrow(
+      /permission denied/,
+    )
   })
 })
 
 describe('rotate_invitation', () => {
   it('makes a new link and kills the old one', async () => {
     const { space_id, invite_token: oldToken } = await newSpace()
-    const { invite_token: newToken } = await rpc<{ invite_token: string }>(OWNER, 'rotate_invitation', [space_id])
+    const { invite_token: newToken } = await rpc<{ invite_token: string }>(
+      OWNER,
+      'rotate_invitation',
+      [space_id],
+    )
     expect(newToken).not.toBe(oldToken)
     await expect(rpc(PARTNER, 'accept_invitation', [oldToken])).rejects.toThrow(/invite_revoked/)
     expect(await rpc(PARTNER, 'accept_invitation', [newToken])).toMatchObject({ space_id })
@@ -212,7 +246,9 @@ describe('privacy between spaces and outsiders', () => {
     expect(await rows(THIRD, 'select * from public.spaces')).toEqual([])
     expect(await rows(THIRD, 'select * from public.space_members')).toEqual([])
     expect(await rows(THIRD, 'select id from public.invitations')).toEqual([])
-    expect(await rows(THIRD, 'select display_name from public.profiles')).toEqual([{ display_name: 'Stranger' }])
+    expect(await rows(THIRD, 'select display_name from public.profiles')).toEqual([
+      { display_name: 'Stranger' },
+    ])
   })
 
   it('two spaces never see each other’s data', async () => {
@@ -226,18 +262,25 @@ describe('privacy between spaces and outsiders', () => {
 
   it('nobody can read token hashes', async () => {
     await newSpace()
-    await expect(rows(OWNER, 'select token_hash from public.invitations')).rejects.toThrow(/permission denied/)
+    await expect(rows(OWNER, 'select token_hash from public.invitations')).rejects.toThrow(
+      /permission denied/,
+    )
   })
 
   it('clients cannot write spaces, members or invites directly', async () => {
     const { space_id } = await newSpace()
     await expect(
-      rows(THIRD, 'insert into public.space_members (space_id, user_id) values ($1, $2)', [space_id, THIRD]),
+      rows(THIRD, 'insert into public.space_members (space_id, user_id) values ($1, $2)', [
+        space_id,
+        THIRD,
+      ]),
     ).rejects.toThrow(/permission denied/)
-    await expect(rows(OWNER, `insert into public.spaces (created_by) values ($1)`, [OWNER])).rejects.toThrow(
+    await expect(
+      rows(OWNER, `insert into public.spaces (created_by) values ($1)`, [OWNER]),
+    ).rejects.toThrow(/permission denied/)
+    await expect(rows(OWNER, `update public.spaces set status = 'closed'`)).rejects.toThrow(
       /permission denied/,
     )
-    await expect(rows(OWNER, `update public.spaces set status = 'closed'`)).rejects.toThrow(/permission denied/)
     await expect(rows(OWNER, 'delete from public.invitations')).rejects.toThrow(/permission denied/)
   })
 
@@ -245,7 +288,9 @@ describe('privacy between spaces and outsiders', () => {
     const { space_id } = await newSpace()
     await rows(OWNER, `update public.spaces set title = 'renamed' where id = $1`, [space_id])
     await as(db, THIRD)
-    const res = await db.query(`update public.spaces set title = 'hijack' where id = $1`, [space_id])
+    const res = await db.query(`update public.spaces set title = 'hijack' where id = $1`, [
+      space_id,
+    ])
     expect(res.affectedRows).toBe(0)
     expect(await rows(OWNER, 'select title from public.spaces')).toEqual([{ title: 'renamed' }])
   })
@@ -267,7 +312,9 @@ describe('leave_space', () => {
     expect(await rows(PARTNER, 'select * from public.spaces')).toEqual([])
     expect(await rows(OWNER, 'select status from public.spaces')).toEqual([{ status: 'closed' }])
     // The leaver's name is no longer visible to the remaining member.
-    expect(await rows(OWNER, 'select display_name from public.profiles')).toEqual([{ display_name: 'Abhi' }])
+    expect(await rows(OWNER, 'select display_name from public.profiles')).toEqual([
+      { display_name: 'Abhi' },
+    ])
     // Nobody can get a new link into a closed space.
     await expect(rpc(OWNER, 'rotate_invitation', [space_id])).rejects.toThrow(/space_closed/)
   })
@@ -285,7 +332,10 @@ describe('leave_space', () => {
     const { space_id, invite_token } = await newSpace()
     await asAdmin(db)
     // Keep a second member so the space survives and the invite can be inspected.
-    await db.query('insert into public.space_members (space_id, user_id) values ($1, $2)', [space_id, THIRD])
+    await db.query('insert into public.space_members (space_id, user_id) values ($1, $2)', [
+      space_id,
+      THIRD,
+    ])
     await rpc(OWNER, 'leave_space', [space_id])
     expect(await rpc(PARTNER, 'get_invitation', [invite_token])).toEqual({ status: 'revoked' })
   })
