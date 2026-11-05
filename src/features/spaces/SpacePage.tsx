@@ -12,6 +12,7 @@ import { RequireAuth, RequireProfile } from '@/features/auth/guards'
 import { useMyProfile } from '@/features/profile/api'
 import { spaceErrorMessage, spaceLabel, useLeaveSpace, useSpace, type Space } from './api'
 import { InviteCard } from './InviteCard'
+import { recallInviteToken, rememberInviteToken } from './pendingInvite'
 
 export default function SpaceRoute() {
   return (
@@ -37,7 +38,9 @@ function SpacePage() {
   const navigate = useNavigate()
   const toast = useToast()
   const nav = (location.state ?? {}) as NavState
-  const [token, setToken] = useState<string | null>(nav.inviteToken ?? null)
+  const [token, setToken] = useState<string | null>(
+    () => nav.inviteToken ?? recallInviteToken(spaceId),
+  )
   // Remember the one-off welcome flags for this visit only.
   const [flags] = useState(() => ({ justCreated: !!nav.justCreated, justJoined: !!nav.justJoined }))
   const space = useSpace(spaceId, session.user.id)
@@ -57,12 +60,16 @@ function SpacePage() {
     lastPhase.current = phase
   }, [space.data, toast])
 
-  // Keep the one-time token in this tab's history entry (so a refresh still shows it),
-  // and drop the welcome flags from history so they don't replay on refresh.
-  const { pathname } = location
+  // Remember the link for this tab (so it can be copied again later), and clear
+  // the one-off navigation state so the welcome moment doesn't replay on refresh.
   useEffect(() => {
-    navigate(pathname, { replace: true, state: token ? { inviteToken: token } : null })
-  }, [token, pathname, navigate])
+    rememberInviteToken(spaceId, token)
+  }, [spaceId, token])
+  const { pathname } = location
+  const hadState = location.state != null
+  useEffect(() => {
+    if (hadState) navigate(pathname, { replace: true, state: null })
+  }, [hadState, pathname, navigate])
 
   if (space.isPending) return <BrandLoader />
   if (space.isError) {

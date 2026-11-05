@@ -19,6 +19,16 @@ Viewports: iPhone SE (375×667), Pixel 7 (412×915), tablet 768×1024, desktop 1
 | Accessibility | axe via Playwright                 | WCAG 2.1 AA; serious or critical violations fail the build                            |
 | Performance   | Lighthouse (from stage 7)          | Mobile perf ≥ 90, a11y ≥ 95 targets                                                   |
 
+## Verified — 2026-11-05 (stage 3)
+
+- `npm run check`: **90 tests** — 30 new database tests for spaces and invites: create; token only stored hashed; join; third person rejected (also when bypassing the functions); creator can't join own invite; double tap safe; expired / revoked / replaced links refused; members-only actions; outsiders and anonymous users see nothing; two spaces fully isolated; token hashes unreadable; no direct writes; rename; leave (close vs delete, invite cancelled).
+- Playwright: **67 pass** (9 skipped by design: the multi-person journeys run once, at phone size). New, using separate browsers per person against a shared mock backend (`e2e/mock-supabase.ts`):
+  - Abhi creates a space → Meera opens the link signed out (token removed from the address bar, sees "Abhi wants to…") → signs up → names herself → joins → Abhi's screen updates without refresh → a third person is turned away and can't open the space URL → Meera leaves → Abhi's space shows Closed.
+  - Own link explains itself; refresh keeps the link; new link kills the old; cancelled and made-up links explained.
+  - Deleting a space nobody joined kills its link.
+  - No serious accessibility issues on invite, join and space screens.
+- **Not yet verified:** the migration on the real Supabase project; real two-phone test.
+
 ## Performance — 2026-11-05
 
 `npm run perf -- <url>` (headless Chrome, iPhone-sized, 4G throttle 150 ms RTT / 4 Mbps, 4× CPU slowdown, every Supabase call delayed 350 ms, cache disabled):

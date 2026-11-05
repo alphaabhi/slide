@@ -51,7 +51,7 @@ test('new user: get started → email code → choose name → home → sign out
 
 test('returning user skips onboarding', async ({ page }) => {
   await mockSupabase(page, {
-    profile: { id: '11111111-1111-4111-8111-111111111111', display_name: 'Meera' },
+    profile: { display_name: 'Meera' },
   })
   await page.goto('/home')
   await expect(page).toHaveURL(/sign-in/)
@@ -105,7 +105,7 @@ test('rename from home', async ({ page }) => {
 
 test('external redirect targets are ignored', async ({ page }) => {
   await mockSupabase(page, {
-    profile: { id: '11111111-1111-4111-8111-111111111111', display_name: 'Meera' },
+    profile: { display_name: 'Meera' },
   })
   await page.goto('/sign-in?next=//evil.example.com')
   await signIn(page)

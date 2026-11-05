@@ -4,6 +4,16 @@ Newest first. Each entry: what, why, and what it rules out. Reversible decisions
 
 ## 2026-11-05
 
+**D-024 · How spaces and invites work (stage 3).**
+
+- _Token shown once._ Only a SHA-256 hash is stored, so the server can't show a link again. The creator's tab remembers the latest link (sessionStorage, per space) so it can be copied again in that tab; otherwise "Make a new link" replaces it and kills the old one.
+- _Token never stays in the address bar._ `/i/<token>` immediately stores the token in sessionStorage and moves to `/join`, so it isn't left in history or shared screenshots; it survives the sign-in and name steps in the same tab.
+- _Signed-out preview._ The join page shows who invited you and the space title before you sign in (only while the invite is usable), because "Abhi wants to take the conversation somewhere else" is what makes someone sign up.
+- _Leaving._ The leaver loses access at once; if the other person remains the space closes (they keep read access to history, nobody can send or join); when nobody is left it's deleted. Stated in the confirmation dialog.
+- _Limits._ Invites last 7 days; 20 new spaces/day per person and 20 new links/day per space.
+- _Arrival detection._ The waiting screen checks every 6 s until the other person joins; replaced by live updates in stage 4.
+- _Default name._ Untitled spaces show as "You & Meera".
+
 **D-023 · Domain: `slidedm.space`.** Bought by the owner at Hostinger. Sign-in emails send from the subdomain `mail.slidedm.space` via Resend (keeps the root domain's email reputation separate). The root domain is SLIDE's web address on Vercel (connected 2026-11-05: `slidedm.space` serves production, `www` 308-redirects to it, so invite links read `slidedm.space/i/…`).
 
 **D-022 · Wordmark "I" rebuilt; landing line rewritten.** Owner noted the "I" touched the L and sat high. It's now two equal halves with a small gap, exactly cap height, bottom on the baseline, with measured equal spacing to the L and D (15/16 px at 4×, matching the other letter gaps). Favicon updated to match. Landing subline, from the owner's draft: "Anyone can slide into DMs. On SLIDE, you get to **stay**." ("stay" in gold).

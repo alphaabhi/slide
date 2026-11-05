@@ -23,15 +23,37 @@ No email or other personal data is stored here; email lives only in Supabase Aut
 | Signed-in, own row            | Yes  | Yes (once) | Yes    | No (only via account deletion) |
 | Signed-in, someone else's row | No*  | No         | No     | No                             |
 
-\* Stage 3 will allow reading the display name of the other member of a shared space.
+\* Except the other member of a space you share (stage 3).
 
 Column-level grants: clients can write only `display_name`. `id`, `created_at` and `updated_at` are never client-writable.
+
+### Spaces and invitations (stage 3) — `20261106000000_spaces_and_invitations.sql`
+
+| Table           | Key columns                                                                                    | Notes                                                             |
+| --------------- | ---------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| `spaces`        | `id`, `title` (optional, 1–60 chars), `created_by`, `status` (`active` / `closed`), timestamps | One space = exactly two people                                    |
+| `space_members` | PK `(space_id, user_id)`, `joined_at`                                                          | FK to `profiles`; trigger refuses a third member under a row lock |
+| `invitations`   | `token_hash` (SHA-256, unique), `expires_at` (7 days), `revoked_at`, `accepted_by/at`          | At most one open invite per space (partial unique index)          |
+
+**Functions** (the only way to change these tables; identity always from `auth.uid()`):
+
+| Function                   | Who                      | What it does / refuses                                                                                                                                      |
+| -------------------------- | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `create_space(title)`      | signed in, with a name   | Creates space + membership + invite; returns the token once. Max 20/day.                                                                                    |
+| `get_invitation(token)`    | anyone, incl. signed out | Join-page preview: `valid` (with inviter name + title), `own`, `member`, or `not_found` / `expired` / `revoked` / `used` / `full` / `closed` (no details)   |
+| `accept_invitation(token)` | signed in, with a name   | Locks invite + space; refuses own invite, revoked, used, expired, closed, full. Double tap returns the space.                                               |
+| `rotate_invitation(space)` | members                  | New link; old one revoked. Refused if full or closed. Max 20/day per space.                                                                                 |
+| `revoke_invitation(space)` | members                  | Cancels the open link                                                                                                                                       |
+| `leave_space(space)`       | members                  | You lose access; open invite cancelled; other person still there → space `closed` (they keep read access); nobody left → space and everything in it deleted |
+
+Errors are raised with a stable code as the message (`invite_expired`, `space_full`, …) which the app maps to plain language.
+
+**Access (RLS):** members can read their spaces, both member rows, invite status (never `token_hash`) and the other member's profile; members may rename a space. Outsiders and anonymous users see nothing. Internal helpers live in the non-exposed `private` schema.
 
 ## Planned
 
 | Table                                     | Stage |
 | ----------------------------------------- | ----- |
-| `spaces`, `space_members`, `invitations`  | 3     |
 | `messages`                                | 4     |
 | `activity_sessions`, `activity_responses` | 6     |
 

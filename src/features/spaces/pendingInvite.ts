@@ -29,3 +29,27 @@ export function clearPendingInvite(): void {
     // Nothing to clear.
   }
 }
+
+/**
+ * The latest invite link for a space, remembered for this browser tab only, so
+ * its creator can copy it again after moving around the app. Never sent
+ * anywhere; gone when the tab closes.
+ */
+const linkKey = (spaceId: string) => `slide.inviteLink.${spaceId}`
+
+export function rememberInviteToken(spaceId: string, token: string | null): void {
+  try {
+    if (token) window.sessionStorage.setItem(linkKey(spaceId), token)
+    else window.sessionStorage.removeItem(linkKey(spaceId))
+  } catch {
+    // Storage blocked: the person can still make a new link.
+  }
+}
+
+export function recallInviteToken(spaceId: string): string | null {
+  try {
+    return window.sessionStorage.getItem(linkKey(spaceId))
+  } catch {
+    return null
+  }
+}
