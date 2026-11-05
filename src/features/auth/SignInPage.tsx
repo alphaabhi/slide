@@ -1,13 +1,14 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { Navigate, useNavigate, useSearchParams } from 'react-router'
 import { Button } from '@/components/ui/Button'
+import { CodeInput } from '@/components/ui/CodeInput'
 import { Input } from '@/components/ui/Field'
 import { sendSignInCode, verifySignInCode } from './api'
 import { AuthScreen } from './AuthScreen'
 import { useAuth } from './AuthProvider'
 import { authErrorMessage } from './errors'
 import { BrandLoader } from '@/components/BrandLoader'
-import { codeSchema, emailSchema, firstError, safeNext } from './validation'
+import { CODE_LENGTH, codeSchema, emailSchema, firstError, safeNext } from './validation'
 
 const RESEND_SECONDS = 60
 
@@ -158,20 +159,18 @@ function CodeStep({
         noValidate
         className="grid gap-5"
       >
-        <Input
+        <CodeInput
           label="Sign-in code"
-          inputMode="numeric"
-          autoComplete="one-time-code"
-          pattern="[0-9]*"
-          maxLength={12}
+          length={CODE_LENGTH}
           autoFocus
-          placeholder="123456"
-          className="font-meta text-xl tracking-[0.3em]"
+          disabled={busy}
           value={value}
-          onChange={(e) => {
-            const v = e.target.value.replace(/[^\d]/g, '')
+          onChange={(v) => {
             setValue(v)
+            if (error) setError(undefined)
           }}
+          // Sign in as soon as the last digit arrives: no extra tap needed.
+          onComplete={(v) => void verify(v)}
           error={error}
           hint={notice}
         />

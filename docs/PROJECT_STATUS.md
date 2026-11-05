@@ -4,18 +4,18 @@ _Last updated: 2026-11-05_
 
 ## Stage overview
 
-| #   | Stage                                            | Status                                                                   |
-| --- | ------------------------------------------------ | ------------------------------------------------------------------------ |
-| 0   | Foundations                                      | **Done** (local). Waiting on GitHub/Supabase/Vercel accounts to connect. |
-| 1   | Design system                                    | **Done**. Awaiting product-owner review of `/styleguide`.                |
-| 2   | Auth & profiles (email OTP)                      | Next                                                                     |
-| 3   | Spaces & invitations                             | Not started                                                              |
-| 4   | Messaging core                                   | Not started                                                              |
-| 5   | Network resilience                               | Not started                                                              |
-| 6   | Activities                                       | Not started                                                              |
-| 7   | Personalisation, landing, legal pages            | Not started                                                              |
-| 8   | Hardening (security, a11y, performance, devices) | Not started                                                              |
-| 9   | Private beta                                     | Not started                                                              |
+| #   | Stage                                            | Status                                                                                  |
+| --- | ------------------------------------------------ | --------------------------------------------------------------------------------------- |
+| 0   | Foundations                                      | **Done** (local). Waiting on GitHub/Supabase/Vercel accounts to connect.                |
+| 1   | Design system                                    | **Done**. Awaiting product-owner review of `/styleguide`.                               |
+| 2   | Auth & profiles (email code)                     | **Done**. Verified on the live site with several real email addresses.                  |
+| 3   | Spaces & invitations                             | **Done** — live on slidedm.space 2026-11-05. Needs a real two-phone check by the owner. |
+| 4   | Messaging core                                   | Not started                                                                             |
+| 5   | Network resilience                               | Not started                                                                             |
+| 6   | Activities                                       | Not started                                                                             |
+| 7   | Personalisation, landing, legal pages            | Not started                                                                             |
+| 8   | Hardening (security, a11y, performance, devices) | Not started                                                                             |
+| 9   | Private beta                                     | Not started                                                                             |
 
 ## Done
 
@@ -71,4 +71,4 @@ Web app first (mobile-first, PWA later); native iOS/Android only if the web vers
 
 ## Next
 
-Stage 3: spaces and invitations — `spaces`, `space_members`, `invitations` tables, `accept_invitation` function with the two-person limit, create-space and invite-link screens, join page, revoke/rotate, leave space.
+Stage 4: messaging — `messages` table with RLS, real-time delivery to the open space only, history with pagination, composer (Enter / Shift+Enter, mobile keyboard), sending / sent / failed + retry, no duplicates (client ids).

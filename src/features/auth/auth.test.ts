@@ -13,9 +13,9 @@ describe('emailSchema', () => {
 
 describe('codeSchema', () => {
   it('accepts 6-digit codes, ignoring spaces', () => {
-    expect(codeSchema.parse('123 456')).toBe('123456')
+    expect(codeSchema.parse('424 242')).toBe('424242')
   })
-  it.each(['', '12345', 'abcdef', '12345a'])('rejects %j', (v) => {
+  it.each(['', '12345', '1234567', 'abcdef', '12345a'])('rejects %j', (v) => {
     expect(codeSchema.safeParse(v).success).toBe(false)
   })
 })

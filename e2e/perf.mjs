@@ -90,9 +90,9 @@ async function run(label) {
 
   await page.getByLabel('Email').fill('a@b.com')
   await page.getByRole('button', { name: 'Email me a code' }).click()
-  await page.getByLabel('Sign-in code').fill('424242')
   t0 = Date.now()
-  await page.getByRole('button', { name: 'Sign in', exact: true }).click()
+  // Entering the 6th digit signs in automatically.
+  await page.getByLabel('Sign-in code').fill('424242')
   await page.getByRole('heading', { name: /Hi,/ }).waitFor()
   t['submit code → home'] = Date.now() - t0
 

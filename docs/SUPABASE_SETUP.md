@@ -49,7 +49,7 @@ Sending domain: **`mail.slidedm.space`** (domain `slidedm.space`, registered at 
 **Authentication → Sign In / Providers → Email**:
 
 - Email provider: **enabled**
-- Email OTP length: **6**
+- Email OTP length: **6** (must match `CODE_LENGTH` in `src/features/auth/validation.ts`)
 - Email OTP expiration: **3600** seconds (1 hour) is fine
 
 ## 5. Site URL

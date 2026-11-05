@@ -15,6 +15,11 @@ const AuthLayout = lazy(authArea.layout)
 const SignInPage = lazy(authArea.signIn)
 const OnboardingPage = lazy(authArea.onboarding)
 const HomePage = lazy(authArea.home)
+const SpacePage = lazy(authArea.space)
+const JoinPage = lazy(authArea.join)
+const InviteLinkRedirect = lazy(() =>
+  authArea.join().then((m) => ({ default: m.InviteLinkRedirect })),
+)
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -47,6 +52,9 @@ export function App() {
                   {/* Each page applies its own sign-in / profile checks (see the page modules). */}
                   <Route path="/welcome" element={<OnboardingPage />} />
                   <Route path="/home" element={<HomePage />} />
+                  <Route path="/s/:spaceId" element={<SpacePage />} />
+                  <Route path="/i/:token" element={<InviteLinkRedirect />} />
+                  <Route path="/join" element={<JoinPage />} />
                 </Route>
 
                 <Route path="*" element={<NotFoundPage />} />

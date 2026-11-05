@@ -6,8 +6,8 @@ async function signIn(page: Page, code = VALID_CODE) {
   await page.getByLabel('Email').fill('abhi@example.com')
   await page.getByRole('button', { name: 'Email me a code' }).click()
   await expect(page.getByRole('heading', { name: 'Check your email' })).toBeVisible()
+  // The 6th digit signs in automatically; no button press.
   await page.getByLabel('Sign-in code').fill(code)
-  await page.getByRole('button', { name: 'Sign in', exact: true }).click()
 }
 
 async function expectNoSeriousA11y(page: Page) {
@@ -51,7 +51,7 @@ test('new user: get started → email code → choose name → home → sign out
 
 test('returning user skips onboarding', async ({ page }) => {
   await mockSupabase(page, {
-    profile: { id: '11111111-1111-4111-8111-111111111111', display_name: 'Meera' },
+    profile: { display_name: 'Meera' },
   })
   await page.goto('/home')
   await expect(page).toHaveURL(/sign-in/)
@@ -65,7 +65,20 @@ test('wrong code shows a clear error and lets you retry', async ({ page }) => {
   await signIn(page, '000000')
   await expect(page.getByText('That code is wrong or has expired')).toBeVisible()
   await page.getByLabel('Sign-in code').fill(VALID_CODE)
-  await page.getByRole('button', { name: 'Sign in', exact: true }).click()
+  await expect(page.getByRole('heading', { name: 'What should we call you?' })).toBeVisible()
+})
+
+test('code boxes: pasting a whole message signs in; short codes wait', async ({ page }) => {
+  await mockSupabase(page)
+  await page.goto('/sign-in')
+  await page.getByLabel('Email').fill('abhi@example.com')
+  await page.getByRole('button', { name: 'Email me a code' }).click()
+  const code = page.getByLabel('Sign-in code')
+  await code.fill('4242')
+  await expect(page.getByRole('heading', { name: 'Check your email' })).toBeVisible()
+  await expect(code).toHaveValue('4242')
+  // Pasting "Code: 424 242" keeps only the digits and completes sign-in.
+  await code.fill('Code: 424 242')
   await expect(page.getByRole('heading', { name: 'What should we call you?' })).toBeVisible()
 })
 
@@ -105,7 +118,7 @@ test('rename from home', async ({ page }) => {
 
 test('external redirect targets are ignored', async ({ page }) => {
   await mockSupabase(page, {
-    profile: { id: '11111111-1111-4111-8111-111111111111', display_name: 'Meera' },
+    profile: { display_name: 'Meera' },
   })
   await page.goto('/sign-in?next=//evil.example.com')
   await signIn(page)
