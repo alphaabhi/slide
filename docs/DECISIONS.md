@@ -4,7 +4,7 @@ Newest first. Each entry: what, why, and what it rules out. Reversible decisions
 
 ## 2026-11-05
 
-**D-023 · Domain: `slidedm.space`.** Bought by the owner at Hostinger. Sign-in emails send from the subdomain `mail.slidedm.space` via Resend (keeps the root domain's email reputation separate). The root domain will also become SLIDE's web address on Vercel, replacing `slide-three-xi.vercel.app`.
+**D-023 · Domain: `slidedm.space`.** Bought by the owner at Hostinger. Sign-in emails send from the subdomain `mail.slidedm.space` via Resend (keeps the root domain's email reputation separate). The root domain is SLIDE's web address on Vercel (connected 2026-11-05: `slidedm.space` serves production, `www` 308-redirects to it, so invite links read `slidedm.space/i/…`).
 
 **D-022 · Wordmark "I" rebuilt; landing line rewritten.** Owner noted the "I" touched the L and sat high. It's now two equal halves with a small gap, exactly cap height, bottom on the baseline, with measured equal spacing to the L and D (15/16 px at 4×, matching the other letter gaps). Favicon updated to match. Landing subline, from the owner's draft: "Anyone can slide into DMs. On SLIDE, you get to **stay**." ("stay" in gold).
 

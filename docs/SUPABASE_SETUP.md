@@ -54,7 +54,7 @@ Sending domain: **`mail.slidedm.space`** (domain `slidedm.space`, registered at 
 
 ## 5. Site URL
 
-**Authentication → URL Configuration → Site URL**: `https://slide-three-xi.vercel.app` (the Vercel production URL).
+**Authentication → URL Configuration → Site URL**: `https://slidedm.space`.
 
 ## Vercel environment variables
 
