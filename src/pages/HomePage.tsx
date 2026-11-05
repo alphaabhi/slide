@@ -22,8 +22,9 @@ export function HomePage() {
       <h1 className="mt-6 text-2xl">
         Take the conversation <span className="text-spark">somewhere else.</span>
       </h1>
-      <p className="mt-3 max-w-[38ch] text-fg-muted">
-        A private space for exactly two people. We’re building it now.
+      <p className="mt-3 max-w-[34ch] text-fg-muted [text-wrap:balance]">
+        Anyone can slide into DMs. On SLIDE, you get to{' '}
+        <span className="font-semibold text-gold">stay</span>.
       </p>
       <Link
         to="/sign-in"

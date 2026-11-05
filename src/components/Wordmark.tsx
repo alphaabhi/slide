@@ -15,12 +15,17 @@ export function Wordmark({ className }: { className?: string }) {
       role="img"
     >
       <span aria-hidden="true">SL</span>
+      {/*
+        The "I": two equal halves, exactly cap height, bottom on the baseline,
+        with the same visual gap to the L and the D as between other letters.
+        (Uneven margins compensate for the font's tracking and the D's side bearing.)
+      */}
       <span
         aria-hidden="true"
-        className="relative mx-[0.04em] inline-block h-[0.72em] w-[0.22em] self-center"
+        className="relative mr-[0.005em] ml-[0.085em] inline-block h-[0.757em] w-[0.2em]"
       >
-        <span className="absolute top-0 left-0 h-[55%] w-full rounded-[0.08em] bg-you" />
-        <span className="absolute bottom-0 left-0 h-[55%] w-full translate-y-[8%] rounded-[0.08em] bg-them" />
+        <span className="absolute top-0 left-0 h-[calc(50%-0.02em)] w-full rounded-[0.07em] bg-you" />
+        <span className="absolute bottom-0 left-0 h-[calc(50%-0.02em)] w-full rounded-[0.07em] bg-them" />
       </span>
       <span aria-hidden="true">DE</span>
     </span>
