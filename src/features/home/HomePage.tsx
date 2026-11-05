@@ -13,6 +13,8 @@ import { authErrorMessage, profileErrorMessage } from '@/features/auth/errors'
 import { RequireAuth, RequireProfile } from '@/features/auth/guards'
 import { displayNameSchema, firstError } from '@/features/auth/validation'
 import { useMyProfile, useSaveDisplayName, type Profile } from '@/features/profile/api'
+import { CreateSpaceDialog } from '@/features/spaces/CreateSpaceDialog'
+import { SpacesList } from '@/features/spaces/SpacesList'
 
 export default function HomeRoute() {
   return (
@@ -60,18 +62,21 @@ function HomePage() {
       </h1>
 
       <section aria-labelledby="spaces-heading" className="mt-8">
-        <h2 id="spaces-heading" className="text-xl">
-          Your spaces
-        </h2>
-        <Card className="mt-3">
-          <p className="flex items-center gap-2 font-display font-semibold">
-            <Icon name="sparkle" size={16} className="text-gold" />
-            Spaces arrive in the next update
-          </p>
-          <p className="mt-1 text-sm text-fg-muted">
-            Soon you’ll create a private space here and send one person an invite link.
-          </p>
-        </Card>
+        <div className="flex items-center justify-between gap-3">
+          <h2 id="spaces-heading" className="text-xl">
+            Your spaces
+          </h2>
+          <CreateSpaceDialog
+            userId={session.user.id}
+            trigger={
+              <Button size="sm">
+                <Icon name="sparkle" size={16} />
+                New space
+              </Button>
+            }
+          />
+        </div>
+        <SpacesList userId={session.user.id} />
       </section>
 
       <section aria-labelledby="account-heading" className="mt-10">

@@ -221,6 +221,16 @@
     background-position: 100% 50%;
   }
 }
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
 @keyframes wave {
   0%,
   60%,
@@ -237,6 +247,9 @@
   }
 }
 @layer components {
+  .slide-pop {
+    animation: pop-in var(--duration-slow) var(--ease-spring) both;
+  }
   .wave {
     display: inline-block;
     transform-origin: 70% 70%;

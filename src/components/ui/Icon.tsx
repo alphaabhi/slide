@@ -14,6 +14,7 @@ const paths = {
     </>
   ),
   close: <path d="M6 6l12 12M18 6 6 18" />,
+  back: <path d="M19 12H6M12 18l-6-6 6-6" />,
   copy: (
     <>
       <rect x="8" y="8" width="12" height="12" rx="2.5" />

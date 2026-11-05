@@ -1,6 +1,6 @@
 // @vitest-environment node
 import type { PGlite } from '@electric-sql/pglite'
-import { beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { as, asAdmin, createDb, createUser } from './harness'
 
 const A = '00000000-0000-4000-8000-00000000000a'
@@ -14,6 +14,10 @@ beforeEach(async () => {
   await createUser(db, B)
   await as(db, B)
   await db.query(`insert into public.profiles (display_name) values ('Meera')`)
+})
+
+afterEach(async () => {
+  await db.close()
 })
 
 const names = async () =>
