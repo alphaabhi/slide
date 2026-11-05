@@ -4,6 +4,8 @@ Newest first. Each entry: what, why, and what it rules out. Reversible decisions
 
 ## 2026-11-05
 
+**D-023 · Domain: `slidedm.space`.** Bought by the owner at Hostinger. Sign-in emails send from the subdomain `mail.slidedm.space` via Resend (keeps the root domain's email reputation separate). The root domain will also become SLIDE's web address on Vercel, replacing `slide-three-xi.vercel.app`.
+
 **D-022 · Wordmark "I" rebuilt; landing line rewritten.** Owner noted the "I" touched the L and sat high. It's now two equal halves with a small gap, exactly cap height, bottom on the baseline, with measured equal spacing to the L and D (15/16 px at 4×, matching the other letter gaps). Favicon updated to match. Landing subline, from the owner's draft: "Anyone can slide into DMs. On SLIDE, you get to **stay**." ("stay" in gold).
 
 **D-021 · Never a blank screen; signed-in code loads in parallel.** Owner reported slow loads and a black screen needing several refreshes. Causes found: (1) after a new deploy, an open page's old code files no longer exist and the lazy import failed silently, leaving a blank page; (2) three code files downloaded one after another before sign-in/home could render. Fixes: an error boundary + `vite:preloadError` handler reload once on missing files (guarded against loops), otherwise a plain "Reload" screen; a branded loader inlined in `index.html` for the first paint; all signed-in pages are fetched together (`src/app/routes.ts`) and preloaded in the background on the landing page; the profile is prefetched as soon as the session is known; faster query retries. Measured with `npm run perf` (see TESTING.md).

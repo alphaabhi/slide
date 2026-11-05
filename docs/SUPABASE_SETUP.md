@@ -22,18 +22,18 @@ Supabase only lets you edit email templates once a custom SMTP sender is set up.
 2. Resend → **API Keys → Create API key** (permission: _Sending access_). Copy it. It's a secret — it goes into Supabase only, never into the app or a chat.
 3. Supabase → **Authentication → Emails → Set up SMTP** (top of the Templates page) → enable **Custom SMTP**:
 
-   | Field        | Value                                                |
-   | ------------ | ---------------------------------------------------- |
-   | Sender email | `onboarding@resend.dev` (until a domain is verified) |
-   | Sender name  | `SLIDE`                                              |
-   | Host         | `smtp.resend.com`                                    |
-   | Port         | `465`                                                |
-   | Username     | `resend`                                             |
-   | Password     | the Resend API key                                   |
+   | Field        | Value                                                                                    |
+   | ------------ | ---------------------------------------------------------------------------------------- |
+   | Sender email | `signin@mail.slidedm.space` (was `onboarding@resend.dev` before the domain was verified) |
+   | Sender name  | `SLIDE`                                                                                  |
+   | Host         | `smtp.resend.com`                                                                        |
+   | Port         | `465`                                                                                    |
+   | Username     | `resend`                                                                                 |
+   | Password     | the Resend API key                                                                       |
 
 4. Save.
 
-Until a domain is verified in Resend, emails only reach the address you signed up to Resend with. To let anyone sign in: verify a domain in Resend (**Domains → Add domain**, then add the DNS records it shows at your domain registrar) and change the sender to e.g. `signin@yourdomain`.
+Sending domain: **`mail.slidedm.space`** (domain `slidedm.space`, registered at Hostinger, DNS managed in Hostinger → Domains → slidedm.space → DNS / Nameservers). The DKIM, SPF and DMARC records Resend shows are added there, with the **Name exactly as Resend shows it** (Hostinger appends `.slidedm.space` itself). Until Resend shows the domain as _Verified_, emails only reach the Resend account owner's address.
 
 ## 3. Make sign-in emails send a code
 
