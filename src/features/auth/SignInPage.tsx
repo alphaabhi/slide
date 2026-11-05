@@ -6,7 +6,7 @@ import { sendSignInCode, verifySignInCode } from './api'
 import { AuthScreen } from './AuthScreen'
 import { useAuth } from './AuthProvider'
 import { authErrorMessage } from './errors'
-import { FullPageSpinner } from './guards'
+import { BrandLoader } from '@/components/BrandLoader'
 import { codeSchema, emailSchema, firstError, safeNext } from './validation'
 
 const RESEND_SECONDS = 60
@@ -17,7 +17,7 @@ export default function SignInPage() {
   const next = safeNext(params.get('next'))
   const [email, setEmail] = useState<string | null>(null)
 
-  if (state.status === 'loading') return <FullPageSpinner />
+  if (state.status === 'loading') return <BrandLoader />
   if (state.status === 'signed-in') return <Navigate to={next} replace />
 
   return email === null ? (
@@ -50,7 +50,11 @@ function EmailStep({ onSent }: { onSent: (email: string) => void }) {
 
   return (
     <AuthScreen
-      title="Sign in to SLIDE"
+      title={
+        <>
+          Sign in to <span className="text-spark">SLIDE</span>
+        </>
+      }
       description="We’ll email you a code. No password needed. New here? This creates your account."
     >
       <form onSubmit={submit} noValidate className="grid gap-5">
@@ -134,11 +138,15 @@ function CodeStep({
 
   return (
     <AuthScreen
-      title="Check your email"
+      title={
+        <>
+          Check your email <span aria-hidden="true">📬</span>
+        </>
+      }
       description={
         <>
           We sent a sign-in code to{' '}
-          <span className="font-semibold text-fg [overflow-wrap:anywhere]">{email}</span>.
+          <span className="font-semibold text-gold [overflow-wrap:anywhere]">{email}</span>.
         </>
       }
     >

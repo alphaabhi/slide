@@ -10,20 +10,24 @@ const COLUMNS = 'id, display_name'
 
 export const profileKey = (userId: string) => ['profile', userId] as const
 
+export async function fetchMyProfile(userId: string): Promise<Profile | null> {
+  const { data, error } = await getSupabase()
+    .from('profiles')
+    .select(COLUMNS)
+    .eq('id', userId)
+    .maybeSingle<Profile>()
+  if (error) throw error
+  return data
+}
+
+export const myProfileQuery = (userId: string) => ({
+  queryKey: profileKey(userId),
+  queryFn: () => fetchMyProfile(userId),
+})
+
 /** The signed-in user's profile, or null if they haven't chosen a name yet. */
 export function useMyProfile(userId: string) {
-  return useQuery({
-    queryKey: profileKey(userId),
-    queryFn: async (): Promise<Profile | null> => {
-      const { data, error } = await getSupabase()
-        .from('profiles')
-        .select(COLUMNS)
-        .eq('id', userId)
-        .maybeSingle<Profile>()
-      if (error) throw error
-      return data
-    },
-  })
+  return useQuery(myProfileQuery(userId))
 }
 
 /**

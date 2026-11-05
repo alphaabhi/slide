@@ -15,9 +15,62 @@
     />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>SLIDE</title>
+    <!-- First paint before any JavaScript: same loader as src/components/BrandLoader.tsx -->
+    <style>
+      html {
+        background: #0c0c0d;
+      }
+      .boot {
+        display: grid;
+        place-items: center;
+        min-height: 100vh;
+        min-height: 100dvh;
+      }
+      .boot i {
+        position: relative;
+        display: block;
+        width: 14px;
+        height: 44px;
+      }
+      .boot i::before,
+      .boot i::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        width: 14px;
+        height: 24px;
+        border-radius: 6px;
+        animation: boot 1.1s cubic-bezier(0.22, 1, 0.36, 1) infinite alternate;
+      }
+      .boot i::before {
+        top: 0;
+        background: #f1f1f2;
+      }
+      .boot i::after {
+        bottom: 0;
+        background: #7fb0ff;
+        animation-direction: alternate-reverse;
+      }
+      @keyframes boot {
+        from {
+          transform: translateY(-6px);
+        }
+        to {
+          transform: translateY(6px);
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .boot i::before,
+        .boot i::after {
+          animation: none;
+        }
+      }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div class="boot" role="status" aria-label="Loading"><i></i></div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

@@ -51,6 +51,16 @@ _Last updated: 2026-11-05_
 1. First real sign-in on the live site with the Resend email (confirms SMTP, templates and Vercel variables).
 2. Decide the domain for SLIDE's website and sign-in emails (needed before anyone else can sign in).
 
+## Delight pass (planned, owner request 2026-11-05)
+
+Animations, loading moments and emoji that make onboarding and activities feel playful. Planned per stage so each lands with the feature it belongs to, within the instructions' motion rules (short, transform/opacity only, reduced-motion respected, never blocking sending):
+
+- Done now: brand loader (sliding pills), shimmering keyword highlight, waving 👋 greeting, live name preview, 📬 on "check your email".
+- Stage 3: a "your space is ready" moment and a playful invite card ("Come slide into my space"); a welcome animation when the second person joins.
+- Stage 4: message slide-in per sender, typing dots, emoji-friendly composer, empty-chat starters.
+- Stage 6: activity reveal (both picks flip in), a small celebration when you match, streak/prompt emoji.
+- Stage 7: landing page with a live mini-preview of a conversation.
+
 ## Live
 
 Production (Vercel): https://slide-three-xi.vercel.app — deployed 2026-11-05 from `main`.

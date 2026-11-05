@@ -1,17 +1,9 @@
 import type { ReactNode } from 'react'
 import { Navigate, useLocation } from 'react-router'
+import { BrandLoader } from '@/components/BrandLoader'
 import { Button } from '@/components/ui/Button'
-import { Spinner } from '@/components/ui/Spinner'
 import { useMyProfile } from '@/features/profile/api'
 import { useAuth, useSession } from './AuthProvider'
-
-export function FullPageSpinner({ label = 'Loading' }: { label?: string }) {
-  return (
-    <div className="grid min-h-dvh place-items-center text-fg-muted">
-      <Spinner label={label} className="size-6" />
-    </div>
-  )
-}
 
 function currentPath(loc: { pathname: string; search: string }) {
   return encodeURIComponent(loc.pathname + loc.search)
@@ -21,7 +13,7 @@ function currentPath(loc: { pathname: string; search: string }) {
 export function RequireAuth({ children }: { children: ReactNode }) {
   const { state } = useAuth()
   const location = useLocation()
-  if (state.status === 'loading') return <FullPageSpinner />
+  if (state.status === 'loading') return <BrandLoader />
   if (state.status === 'signed-out') {
     return <Navigate to={`/sign-in?next=${currentPath(location)}`} replace />
   }
@@ -34,7 +26,7 @@ export function RequireProfile({ children }: { children: ReactNode }) {
   const location = useLocation()
   const profile = useMyProfile(session.user.id)
 
-  if (profile.isPending) return <FullPageSpinner />
+  if (profile.isPending) return <BrandLoader />
   if (profile.isError) {
     return (
       <main className="mx-auto flex min-h-dvh max-w-[var(--content-max)] flex-col justify-center px-gutter">

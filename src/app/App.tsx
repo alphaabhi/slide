@@ -1,78 +1,59 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { lazy, Suspense } from 'react'
 import { BrowserRouter, Route, Routes } from 'react-router'
-import { Spinner } from '@/components/ui/Spinner'
+import { BrandLoader } from '@/components/BrandLoader'
 import { ToastProvider } from '@/components/ui/Toast'
 import { env } from '@/lib/env'
+import { authArea } from './routes'
+import { ErrorBoundary } from './ErrorBoundary'
 import { HomePage as LandingPage } from '@/pages/HomePage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
 
-// Route-level code splitting: the landing page never downloads Supabase or the style guide.
+// Route-level code splitting: the landing page never waits for Supabase or the style guide.
 const StyleguidePage = lazy(() => import('@/pages/StyleguidePage'))
-const AuthLayout = lazy(() => import('@/features/auth/AuthLayout'))
-const SignInPage = lazy(() => import('@/features/auth/SignInPage'))
-const OnboardingPage = lazy(() => import('@/features/profile/OnboardingPage'))
-const HomePage = lazy(() => import('@/features/home/HomePage'))
-const RequireAuth = lazy(() =>
-  import('@/features/auth/guards').then((m) => ({ default: m.RequireAuth })),
-)
-const RequireProfile = lazy(() =>
-  import('@/features/auth/guards').then((m) => ({ default: m.RequireProfile })),
-)
+const AuthLayout = lazy(authArea.layout)
+const SignInPage = lazy(authArea.signIn)
+const OnboardingPage = lazy(authArea.onboarding)
+const HomePage = lazy(authArea.home)
 
 const queryClient = new QueryClient({
   defaultOptions: {
-    queries: { staleTime: 30_000, retry: 2, refetchOnWindowFocus: false },
+    queries: {
+      staleTime: 30_000,
+      retry: 2,
+      // Quick first retry on flaky mobile networks: 400 ms, 800 ms (default waits 1 s, 2 s).
+      retryDelay: (attempt) => Math.min(400 * 2 ** attempt, 3000),
+      refetchOnWindowFocus: false,
+    },
     mutations: { retry: 0 },
   },
 })
-
-function PageFallback() {
-  return (
-    <div className="grid min-h-dvh place-items-center text-fg-muted">
-      <Spinner label="Loading" className="size-6" />
-    </div>
-  )
-}
 
 export function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ToastProvider>
-        <BrowserRouter>
-          <Suspense fallback={<PageFallback />}>
-            <Routes>
-              <Route path="/" element={<LandingPage />} />
-              {env.enableStyleguide ? (
-                <Route path="/styleguide" element={<StyleguidePage />} />
-              ) : null}
+        <ErrorBoundary>
+          <BrowserRouter>
+            <Suspense fallback={<BrandLoader />}>
+              <Routes>
+                <Route path="/" element={<LandingPage />} />
+                {env.enableStyleguide ? (
+                  <Route path="/styleguide" element={<StyleguidePage />} />
+                ) : null}
 
-              <Route element={<AuthLayout />}>
-                <Route path="/sign-in" element={<SignInPage />} />
-                <Route
-                  path="/welcome"
-                  element={
-                    <RequireAuth>
-                      <OnboardingPage />
-                    </RequireAuth>
-                  }
-                />
-                <Route
-                  path="/home"
-                  element={
-                    <RequireAuth>
-                      <RequireProfile>
-                        <HomePage />
-                      </RequireProfile>
-                    </RequireAuth>
-                  }
-                />
-              </Route>
+                <Route element={<AuthLayout />}>
+                  <Route path="/sign-in" element={<SignInPage />} />
+                  {/* Each page applies its own sign-in / profile checks (see the page modules). */}
+                  <Route path="/welcome" element={<OnboardingPage />} />
+                  <Route path="/home" element={<HomePage />} />
+                </Route>
 
-              <Route path="*" element={<NotFoundPage />} />
-            </Routes>
-          </Suspense>
-        </BrowserRouter>
+                <Route path="*" element={<NotFoundPage />} />
+              </Routes>
+            </Suspense>
+          </BrowserRouter>
+        </ErrorBoundary>
       </ToastProvider>
     </QueryClientProvider>
   )

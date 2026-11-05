@@ -89,6 +89,15 @@
   --composer-max: 40rem;
   --content-max: 42rem;
 
+  /* Highlight for keywords (names, key phrases): gold → pink → blue. Use sparingly — about one per screen. */
+  --gradient-spark: linear-gradient(
+    100deg,
+    var(--color-gold) 0%,
+    var(--color-glow) 35%,
+    var(--color-them) 70%,
+    var(--color-gold) 100%
+  );
+
   /* Backdrop: a faint top light on near-black */
   --app-bg: radial-gradient(80% 40% at 50% -10%, #1c1c1f 0%, transparent 70%), #0c0c0d;
 }

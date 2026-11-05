@@ -11,6 +11,7 @@ import {
   type ReactNode,
 } from 'react'
 import { useToast } from '@/components/ui/Toast'
+import { myProfileQuery } from '@/features/profile/api'
 import { getSupabase } from '@/lib/supabase'
 import { signOut as apiSignOut } from './api'
 
@@ -57,6 +58,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!lifecycle.active) return
       if (session) {
         wasSignedIn.current = true
+        // Fetch the profile alongside the page code, not after it (saves a round trip).
+        void queryClient.prefetchQuery(myProfileQuery(session.user.id))
         setState({ status: 'signed-in', session })
       } else {
         setState({ status: 'signed-out', session: null })

@@ -19,6 +19,21 @@ Viewports: iPhone SE (375×667), Pixel 7 (412×915), tablet 768×1024, desktop 1
 | Accessibility | axe via Playwright                 | WCAG 2.1 AA; serious or critical violations fail the build                            |
 | Performance   | Lighthouse (from stage 7)          | Mobile perf ≥ 90, a11y ≥ 95 targets                                                   |
 
+## Performance — 2026-11-05
+
+`npm run perf -- <url>` (headless Chrome, iPhone-sized, 4G throttle 150 ms RTT / 4 Mbps, 4× CPU slowdown, every Supabase call delayed 350 ms, cache disabled):
+
+| Step                             | Before | After (D-021)                   |
+| -------------------------------- | ------ | ------------------------------- |
+| Landing: first content           | 1.17 s | 1.00 s (loader shows instantly) |
+| Tap "Get started" → sign-in form | 1.05 s | 0.56 s                          |
+| Submit code → home               | 1.43 s | 0.96 s                          |
+| Reload /home while signed in     | 2.63 s | 1.62 s                          |
+
+Also verified: when a code file is missing after a deploy, the page reloads itself once and loads; if it stays missing, a "Reload" message appears (no blank page, no reload loop).
+
+Not yet measured: real devices on the live site; Lighthouse (stage 7–8).
+
 ## Verified — 2026-11-05 (stage 2)
 
 - `npm run check`: pass — **58 tests**: 19 database access tests for `profiles`, 30 auth unit tests (email/code/name rules, open-redirect protection, error messages), 9 component tests.
