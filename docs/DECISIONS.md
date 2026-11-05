@@ -4,6 +4,8 @@ Newest first. Each entry: what, why, and what it rules out. Reversible decisions
 
 ## 2026-11-05
 
+**D-025 · Sign-in code: 6 digits in six boxes, auto sign-in.** Owner asked for a 4-character letters-and-numbers code. Supabase only issues numeric codes of 6–10 digits, and building a custom code system would mean writing our own generation, checking, expiry and lockouts (a security trade-off) for a weaker code. Agreed instead: Supabase "Email OTP Length" set to 6 (was 8), and a six-box entry (`CodeInput`) — one real field under the boxes, so phone autofill ("From Mail"), password managers and pasting a whole message all work; signs in as soon as the 6th digit arrives. `CODE_LENGTH` in `validation.ts` must match the Supabase setting.
+
 **D-024 · How spaces and invites work (stage 3).**
 
 - _Token shown once._ Only a SHA-256 hash is stored, so the server can't show a link again. The creator's tab remembers the latest link (sessionStorage, per space) so it can be copied again in that tab; otherwise "Make a new link" replaces it and kills the old one.

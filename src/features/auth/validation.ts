@@ -7,11 +7,23 @@ export const emailSchema = z
   .max(254, 'That email address is too long.')
   .pipe(z.email('Enter a valid email address, like you@example.com.'))
 
-/** Supabase email codes are 6 digits by default; allow up to 10 in case the project setting changes. */
+/**
+ * Length of the emailed sign-in code. Must match Supabase → Authentication →
+ * Sign In / Providers → Email → "Email OTP Length" (set to 6 on 2026-11-05).
+ */
+export const CODE_LENGTH = 6
+
 export const codeSchema = z
   .string()
   .transform((v) => v.replace(/\s+/g, ''))
-  .pipe(z.string().regex(/^\d{6,10}$/, 'Enter the code from the email. It’s numbers only.'))
+  .pipe(
+    z
+      .string()
+      .regex(
+        new RegExp(`^\\d{${CODE_LENGTH}}$`),
+        `Enter the ${CODE_LENGTH}-digit code from the email.`,
+      ),
+  )
 
 /** Same rules as the database constraints in supabase/migrations/*_profiles.sql. */
 export const displayNameSchema = z

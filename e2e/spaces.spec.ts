@@ -14,7 +14,6 @@ async function signIn(page: Page, email: string) {
   await page.getByLabel('Email').fill(email)
   await page.getByRole('button', { name: 'Email me a code' }).click()
   await page.getByLabel('Sign-in code').fill(VALID_CODE)
-  await page.getByRole('button', { name: 'Sign in', exact: true }).click()
 }
 
 async function signUp(page: Page, email: string, name: string) {

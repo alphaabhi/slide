@@ -19,6 +19,10 @@ Viewports: iPhone SE (375×667), Pixel 7 (412×915), tablet 768×1024, desktop 1
 | Accessibility | axe via Playwright                 | WCAG 2.1 AA; serious or critical violations fail the build                            |
 | Performance   | Lighthouse (from stage 7)          | Mobile perf ≥ 90, a11y ≥ 95 targets                                                   |
 
+## Verified — 2026-11-05 (code entry)
+
+- 93 unit/database tests and 71 browser tests pass. New: six-box code field is one labelled input with `autocomplete="one-time-code"`; keeps digits only; signs in on the 6th digit; pasting "Code: 424 242" works (a test caught that a `maxlength` cap broke this — removed).
+
 ## Verified — 2026-11-05 (stage 3)
 
 - `npm run check`: **90 tests** — 30 new database tests for spaces and invites: create; token only stored hashed; join; third person rejected (also when bypassing the functions); creator can't join own invite; double tap safe; expired / revoked / replaced links refused; members-only actions; outsiders and anonymous users see nothing; two spaces fully isolated; token hashes unreadable; no direct writes; rename; leave (close vs delete, invite cancelled).
