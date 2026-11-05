@@ -4,6 +4,8 @@ _Take the conversation somewhere else._
 
 A private, playful space for exactly two people: one person creates a space, shares an invite link, and the other joins. Real-time chat plus optional shared activities (Would You Rather, This or That, Question of the Day).
 
+**Live:** https://slide-three-xi.vercel.app
+
 **Status:** stage 2 of 9 built (email-code sign-in and profiles); awaiting first real-device check. See [`docs/PROJECT_STATUS.md`](docs/PROJECT_STATUS.md).
 
 ## Stack

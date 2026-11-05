@@ -48,10 +48,12 @@ _Last updated: 2026-11-05_
 
 ## Waiting on the product owner
 
-1. Install the Claude GitHub App on `alphaabhi/slide` so code can be pushed (GitHub account is linked, but the app isn't installed on the repo).
-2. Resend + Supabase custom SMTP, then the two email templates (`docs/SUPABASE_SETUP.md` steps 2–3). Profiles SQL: done.
-3. Vercel: import the repo and add the two environment variables (after the push).
-4. Decide the domain for SLIDE's website and sign-in emails (needed before anyone else can sign in).
+1. First real sign-in on the live site with the Resend email (confirms SMTP, templates and Vercel variables).
+2. Decide the domain for SLIDE's website and sign-in emails (needed before anyone else can sign in).
+
+## Live
+
+Production (Vercel): https://slide-three-xi.vercel.app — deployed 2026-11-05 from `main`.
 
 ## Platform
 

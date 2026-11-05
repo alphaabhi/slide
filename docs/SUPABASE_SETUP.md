@@ -54,7 +54,7 @@ Until a domain is verified in Resend, emails only reach the address you signed u
 
 ## 5. Site URL
 
-**Authentication → URL Configuration → Site URL**: set to the Vercel production URL once it exists (e.g. `https://slide-xxxx.vercel.app`).
+**Authentication → URL Configuration → Site URL**: `https://slide-three-xi.vercel.app` (the Vercel production URL).
 
 ## Vercel environment variables
 
