@@ -49,6 +49,14 @@ describe('safeNext (open-redirect protection)', () => {
 describe('error messages never leak server text', () => {
   it.each([
     [{ name: 'AuthRetryableFetchError', status: 0 }, /connection/],
+    [
+      { name: 'AuthRetryableFetchError', status: 500, message: 'Error sending magic link email' },
+      /couldn’t send a code to that address/,
+    ],
+    [
+      { name: 'AuthRetryableFetchError', status: 503, message: 'Service Unavailable' },
+      /had a problem/,
+    ],
     [{ code: 'over_email_send_rate_limit', status: 429 }, /Too many attempts/],
     [{ code: 'otp_expired', status: 403 }, /wrong or has expired/],
     [{ code: 'something_new', message: 'relation "x" does not exist' }, /^Something went wrong/],

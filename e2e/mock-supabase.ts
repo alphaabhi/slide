@@ -15,7 +15,7 @@ function b64url(obj: object) {
 export interface MockState {
   profile: { id: string; display_name: string } | null
   codesSent: number
-  failNextSend?: 'rate_limit'
+  failNextSend?: 'rate_limit' | 'email_refused'
 }
 
 export async function mockSupabase(page: Page, init: Partial<MockState> = {}): Promise<MockState> {
@@ -54,6 +54,13 @@ export async function mockSupabase(page: Page, init: Partial<MockState> = {}): P
       if (state.failNextSend === 'rate_limit') {
         state.failNextSend = undefined
         return json(route, 429, { code: 'over_email_send_rate_limit', msg: 'rate limit' })
+      }
+      if (state.failNextSend === 'email_refused') {
+        state.failNextSend = undefined
+        return json(route, 500, {
+          code: 'unexpected_failure',
+          msg: 'Error sending magic link email',
+        })
       }
       state.codesSent++
       return json(route, 200, {})

@@ -111,3 +111,14 @@ test('external redirect targets are ignored', async ({ page }) => {
   await signIn(page)
   await expect(page).toHaveURL(/\/home$/)
 })
+
+test('an address the email service refuses gets an honest message, not "check your connection"', async ({
+  page,
+}) => {
+  await mockSupabase(page, { failNextSend: 'email_refused' })
+  await page.goto('/sign-in')
+  await page.getByLabel('Email').fill('friend@example.com')
+  await page.getByRole('button', { name: 'Email me a code' }).click()
+  await expect(page.getByText('We couldn’t send a code to that address')).toBeVisible()
+  await expect(page.getByText(/Check your connection/)).toHaveCount(0)
+})

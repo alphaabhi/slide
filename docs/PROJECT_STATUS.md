@@ -39,7 +39,7 @@ _Last updated: 2026-11-05_
 ## Not done / known gaps
 
 - Stage 2 has been tested against a local Postgres and a mocked Supabase API, not yet against the real project. First real check: sign in on the Vercel preview.
-- Sign-in emails need custom SMTP (Resend) before the code template can be set. Until a domain is verified in Resend, codes only reach the owner's own email.
+- **Blocking other testers:** Resend's test sender (`onboarding@resend.dev`) only delivers to the Resend account owner's address (ajha929@gmail.com). Every other address fails to receive a code until a domain is verified in Resend. The app now says "We couldn't send a code to that address" instead of a misleading connection error.
 - "Your spaces" on the home screen is an honest placeholder until stage 3.
 - Question of the Day uses free-text answers; its card variant is designed in stage 6, not yet built.
 - Landing-page JS is ~78 KB gzip. Re-measure at stage 7 with Lighthouse.

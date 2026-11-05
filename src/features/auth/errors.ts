@@ -13,8 +13,20 @@ export function authErrorMessage(error: unknown): string {
   const e = (error ?? {}) as MaybeAuthError
   const code = e.code ?? ''
 
-  if (e.name === 'AuthRetryableFetchError' || e.status === 0 || e.name === 'TypeError') {
+  // Only a request that never got an answer is a connection problem.
+  if (
+    e.status === 0 ||
+    e.name === 'TypeError' ||
+    (e.name === 'AuthRetryableFetchError' && !e.status)
+  ) {
     return 'Can’t reach SLIDE right now. Check your connection and try again.'
+  }
+  // The server answered but couldn't send the email (e.g. the email service refused the address).
+  if ((e.status ?? 0) >= 500 && /send|email|smtp/i.test(e.message ?? '')) {
+    return 'We couldn’t send a code to that address. Check it’s typed correctly, or try a different email.'
+  }
+  if ((e.status ?? 0) >= 500) {
+    return 'SLIDE’s sign-in service had a problem. Please try again in a minute.'
   }
   if (
     code === 'over_email_send_rate_limit' ||
