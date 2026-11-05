@@ -4,6 +4,8 @@ Newest first. Each entry: what, why, and what it rules out. Reversible decisions
 
 ## 2026-11-05
 
+**D-019 · Custom SMTP via Resend, set up now rather than before beta.** Supabase only allows editing email templates once custom SMTP is configured, and the default templates send a link rather than the code SLIDE uses (D-015). Resend's free tier is the sender; `onboarding@resend.dev` works for the owner's own testing, and a verified domain is required before anyone else can sign in. Kept the code-only design rather than adding link support.
+
 **D-018 · Database access tests use PGlite instead of pgTAP.** This workspace can't reach Supabase or run Docker, so migrations are tested in an in-process Postgres (PGlite) with a stub of `auth.uid()` and the Supabase roles. Same SQL, same RLS engine; tests run in `npm test` and CI. Real-project checks still happen on the deployed preview.
 
 **D-017 · Sign-out is per device (`scope: 'local'`).** Signing out on one phone doesn't sign you out everywhere. On sign-out or session expiry all cached data is cleared from memory.

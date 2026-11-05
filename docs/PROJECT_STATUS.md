@@ -39,7 +39,7 @@ _Last updated: 2026-11-05_
 ## Not done / known gaps
 
 - Stage 2 has been tested against a local Postgres and a mocked Supabase API, not yet against the real project. First real check: sign in on the Vercel preview.
-- Supabase's built-in email sender only reaches members of the Supabase organisation. A real email service (SMTP, e.g. Resend) is required before anyone else can sign in.
+- Sign-in emails need custom SMTP (Resend) before the code template can be set. Until a domain is verified in Resend, codes only reach the owner's own email.
 - "Your spaces" on the home screen is an honest placeholder until stage 3.
 - Question of the Day uses free-text answers; its card variant is designed in stage 6, not yet built.
 - Landing-page JS is ~78 KB gzip. Re-measure at stage 7 with Lighthouse.
@@ -48,9 +48,10 @@ _Last updated: 2026-11-05_
 
 ## Waiting on the product owner
 
-1. Link GitHub to Claude (claude.ai → Settings → Connectors) with access to `alphaabhi/slide`, so the code can be pushed.
-2. Supabase: run the profiles migration and update the email templates (`docs/SUPABASE_SETUP.md`).
+1. Install the Claude GitHub App on `alphaabhi/slide` so code can be pushed (GitHub account is linked, but the app isn't installed on the repo).
+2. Resend + Supabase custom SMTP, then the two email templates (`docs/SUPABASE_SETUP.md` steps 2–3). Profiles SQL: done.
 3. Vercel: import the repo and add the two environment variables (after the push).
+4. Decide the domain for SLIDE's website and sign-in emails (needed before anyone else can sign in).
 
 ## Platform
 
