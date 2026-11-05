@@ -36,7 +36,7 @@ src/
 e2e/            Playwright tests
 supabase/
   migrations/   Versioned SQL
-  tests/        pgTAP RLS tests
+  tests/        Database access tests (PGlite)
 docs/           Project documentation
 ```
 

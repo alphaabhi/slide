@@ -3,12 +3,22 @@ import { lazy, Suspense } from 'react'
 import { BrowserRouter, Route, Routes } from 'react-router'
 import { Spinner } from '@/components/ui/Spinner'
 import { ToastProvider } from '@/components/ui/Toast'
-import { HomePage } from '@/pages/HomePage'
-import { NotFoundPage } from '@/pages/NotFoundPage'
 import { env } from '@/lib/env'
+import { HomePage as LandingPage } from '@/pages/HomePage'
+import { NotFoundPage } from '@/pages/NotFoundPage'
 
-// Route-level code splitting: the style guide never ships in the initial bundle.
+// Route-level code splitting: the landing page never downloads Supabase or the style guide.
 const StyleguidePage = lazy(() => import('@/pages/StyleguidePage'))
+const AuthLayout = lazy(() => import('@/features/auth/AuthLayout'))
+const SignInPage = lazy(() => import('@/features/auth/SignInPage'))
+const OnboardingPage = lazy(() => import('@/features/profile/OnboardingPage'))
+const HomePage = lazy(() => import('@/features/home/HomePage'))
+const RequireAuth = lazy(() =>
+  import('@/features/auth/guards').then((m) => ({ default: m.RequireAuth })),
+)
+const RequireProfile = lazy(() =>
+  import('@/features/auth/guards').then((m) => ({ default: m.RequireProfile })),
+)
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -32,10 +42,33 @@ export function App() {
         <BrowserRouter>
           <Suspense fallback={<PageFallback />}>
             <Routes>
-              <Route path="/" element={<HomePage />} />
+              <Route path="/" element={<LandingPage />} />
               {env.enableStyleguide ? (
                 <Route path="/styleguide" element={<StyleguidePage />} />
               ) : null}
+
+              <Route element={<AuthLayout />}>
+                <Route path="/sign-in" element={<SignInPage />} />
+                <Route
+                  path="/welcome"
+                  element={
+                    <RequireAuth>
+                      <OnboardingPage />
+                    </RequireAuth>
+                  }
+                />
+                <Route
+                  path="/home"
+                  element={
+                    <RequireAuth>
+                      <RequireProfile>
+                        <HomePage />
+                      </RequireProfile>
+                    </RequireAuth>
+                  }
+                />
+              </Route>
+
               <Route path="*" element={<NotFoundPage />} />
             </Routes>
           </Suspense>

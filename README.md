@@ -4,7 +4,7 @@ _Take the conversation somewhere else._
 
 A private, playful space for exactly two people: one person creates a space, shares an invite link, and the other joins. Real-time chat plus optional shared activities (Would You Rather, This or That, Question of the Day).
 
-**Status:** stage 1 of 9 complete (foundations + design system). See [`docs/PROJECT_STATUS.md`](docs/PROJECT_STATUS.md).
+**Status:** stage 2 of 9 built (email-code sign-in and profiles); awaiting first real-device check. See [`docs/PROJECT_STATUS.md`](docs/PROJECT_STATUS.md).
 
 ## Stack
 
@@ -16,7 +16,7 @@ Requires Node 22+.
 
 ```bash
 npm install
-cp .env.example .env.local   # fill in Supabase URL + anon key once the project exists
+cp .env.example .env.local   # fill in the Supabase project URL + publishable key
 npm run dev                  # http://localhost:5173
 ```
 
@@ -42,6 +42,7 @@ If Playwright's bundled browser isn't installed, point it at a system Chrome: `P
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — structure and technical decisions
 - [`docs/DESIGN_SYSTEM.md`](docs/DESIGN_SYSTEM.md) — tokens, components, usage rules
 - [`docs/DATABASE.md`](docs/DATABASE.md) — schema and access policies
+- [`docs/SUPABASE_SETUP.md`](docs/SUPABASE_SETUP.md) — one-time Supabase settings and how to run migrations
 - [`docs/TESTING.md`](docs/TESTING.md) — how to test and what has been verified
 
 **Starting a new session?** Read the instructions doc, then PROJECT_STATUS and DECISIONS, before changing anything.

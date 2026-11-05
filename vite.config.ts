@@ -16,7 +16,8 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
-    include: ['src/**/*.test.{ts,tsx}'],
+    include: ['src/**/*.test.{ts,tsx}', 'supabase/tests/**/*.test.ts'],
+    testTimeout: 20_000,
     css: false,
   },
 })

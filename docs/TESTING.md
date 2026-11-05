@@ -11,13 +11,27 @@ Viewports: iPhone SE (375×667), Pixel 7 (412×915), tablet 768×1024, desktop 1
 
 ## Layers
 
-| Layer         | Tool                      | Covers                                                                                |
-| ------------- | ------------------------- | ------------------------------------------------------------------------------------- |
-| Unit          | Vitest + Testing Library  | Component behaviour, pure logic                                                       |
-| Database      | pgTAP (from stage 2)      | RLS policies and RPCs as owner / partner / outsider / anon                            |
-| End-to-end    | Playwright                | Real user journeys; two isolated browser contexts for two-person flows (from stage 3) |
-| Accessibility | axe via Playwright        | WCAG 2.1 AA; serious or critical violations fail the build                            |
-| Performance   | Lighthouse (from stage 7) | Mobile perf ≥ 90, a11y ≥ 95 targets                                                   |
+| Layer         | Tool                               | Covers                                                                                |
+| ------------- | ---------------------------------- | ------------------------------------------------------------------------------------- |
+| Unit          | Vitest + Testing Library           | Component behaviour, pure logic                                                       |
+| Database      | Vitest + PGlite (`supabase/tests`) | Migrations, RLS policies and functions as owner / other user / anon                   |
+| End-to-end    | Playwright                         | Real user journeys; two isolated browser contexts for two-person flows (from stage 3) |
+| Accessibility | axe via Playwright                 | WCAG 2.1 AA; serious or critical violations fail the build                            |
+| Performance   | Lighthouse (from stage 7)          | Mobile perf ≥ 90, a11y ≥ 95 targets                                                   |
+
+## Verified — 2026-11-05 (stage 2)
+
+- `npm run check`: pass — **58 tests**: 19 database access tests for `profiles`, 30 auth unit tests (email/code/name rules, open-redirect protection, error messages), 9 component tests.
+- Playwright: **60/60 pass** at 4 viewports, including the sign-in journey against a mocked Supabase API (`e2e/mock-supabase.ts`):
+  - new user: Get started → email → code → name → home → refresh keeps session → sign out → protected page redirects to sign-in
+  - returning user skips the name step
+  - wrong code → clear error → retry works
+  - empty email and rate-limit errors explained
+  - resend disabled during cooldown; "use a different email"
+  - rename from home
+  - `?next=//evil.example.com` ignored
+  - no serious accessibility issues on sign-in, name and home screens
+- **Not yet verified:** real Supabase sign-in, real email delivery, real devices.
 
 ## Verified so far — 2026-11-04 (stage 0–1)
 

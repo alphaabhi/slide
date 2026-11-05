@@ -4,6 +4,14 @@ Newest first. Each entry: what, why, and what it rules out. Reversible decisions
 
 ## 2026-11-05
 
+**D-018 · Database access tests use PGlite instead of pgTAP.** This workspace can't reach Supabase or run Docker, so migrations are tested in an in-process Postgres (PGlite) with a stub of `auth.uid()` and the Supabase roles. Same SQL, same RLS engine; tests run in `npm test` and CI. Real-project checks still happen on the deployed preview.
+
+**D-017 · Sign-out is per device (`scope: 'local'`).** Signing out on one phone doesn't sign you out everywhere. On sign-out or session expiry all cached data is cleared from memory.
+
+**D-016 · Profile id comes from the session, never the client.** `profiles.id` defaults to `auth.uid()` and clients have column-level insert/update rights on `display_name` only. A profile is created on first sign-in at the "What should we call you?" step; no profile = onboarding.
+
+**D-015 · Sign-in by 6-digit email code only (no clickable magic link).** Codes work when the email is opened on a different device or in an in-app browser (common for people arriving from Instagram/Hinge), and avoid redirect-URL configuration. Requires the Supabase email templates to include `{{ .Token }}` (see `SUPABASE_SETUP.md`). Resend has a 60-second cooldown matching Supabase's limit.
+
 **D-014 · Web first; native iOS/Android only if the web version works out.** Decided by the product owner. SLIDE ships as a mobile-first web app (installable to the home screen as a PWA in stage 8). Invite links open straight in the browser with nothing to install, which suits a product that grows through links. If native apps are justified later, two routes reuse this work: (a) wrap this same app with Capacitor for the App Store / Play Store (fastest; must add real native value such as push notifications to pass Apple review), or (b) rebuild the screens in React Native / Expo against the same Supabase backend. The backend, database, security policies and business logic carry over either way. To keep both routes open: business logic stays out of components (features/*/api.ts and hooks), and nothing depends on browser-only APIs without a fallback.
 
 **D-013 · Graphite chosen as the only theme; Violet removed (resolves D-012).** Decided by the product owner. Graphite values are now the token defaults; the theme switcher, `data-theme` overrides and Violet-only utilities (`bg-you-fill`, backdrop blur) were deleted to keep the CSS small. Violet remains in git history (commit 445ec53) if it's ever wanted as an optional theme. `surface-glass` renamed to `surface-panel`.

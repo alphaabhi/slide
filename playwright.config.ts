@@ -33,8 +33,13 @@ export default defineConfig({
   webServer: {
     command: `npm run build && npx vite preview --port ${port} --strictPort`,
     port,
-    reuseExistingServer: !process.env.CI,
-    env: { VITE_ENABLE_STYLEGUIDE: 'true' },
+    reuseExistingServer: false,
+    env: {
+      VITE_ENABLE_STYLEGUIDE: 'true',
+      // Points the app at the in-test mock (e2e/mock-supabase.ts), never a real project.
+      VITE_SUPABASE_URL: 'https://e2e-mock.supabase.co',
+      VITE_SUPABASE_ANON_KEY: 'sb_publishable_e2e_mock_key_not_real',
+    },
     timeout: 120_000,
   },
 })
