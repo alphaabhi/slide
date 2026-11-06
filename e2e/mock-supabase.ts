@@ -1,4 +1,4 @@
-import type { Page, Route } from '@playwright/test'
+import type { Page, Route, WebSocketRoute } from '@playwright/test'
 
 /**
  * An in-memory stand-in for the Supabase Auth, REST and RPC endpoints this app
@@ -21,6 +21,22 @@ interface MockSpace {
   members: { user_id: string; joined_at: string }[]
 }
 
+export interface MockMessage {
+  id: string
+  space_id: string
+  sender_id: string
+  client_id: string
+  body: string
+  created_at: string
+}
+
+/** One browser's live-updates connection and the channels it has joined. */
+interface LiveSocket {
+  ws: WebSocketRoute
+  uid: string | null
+  subs: Map<string, { joinRef: string; spaceId: string; bindingId: number }>
+}
+
 interface MockInvite {
   token: string
   space_id: string
@@ -35,9 +51,89 @@ export class Backend {
   profiles = new Map<string, string>()
   spaces = new Map<string, MockSpace>()
   invites: MockInvite[] = []
+  messages: MockMessage[] = []
+  sockets = new Set<LiveSocket>()
+  /** When true, live updates are down (simulates a dropped websocket). */
+  liveDown = false
+  /** When set, the next N send_message calls fail as if the network dropped. */
+  failSends = 0
   codesSent = 0
   failNextSend?: 'rate_limit' | 'email_refused'
   private seq = 0
+  private lastTs = 0
+
+  private nextTimestamp() {
+    this.lastTs = Math.max(Date.now(), this.lastTs + 1)
+    return new Date(this.lastTs).toISOString()
+  }
+
+  /** Push a new message to every connected member of its space. */
+  publish(m: MockMessage) {
+    if (this.liveDown) return
+    const space = this.spaces.get(m.space_id)
+    for (const sock of this.sockets) {
+      for (const [topic, sub] of sock.subs) {
+        if (sub.spaceId !== m.space_id) continue
+        if (!sock.uid || !space?.members.some((x) => x.user_id === sock.uid)) continue
+        const columns = Object.keys(m).map((name) => ({ name, type: 'text' }))
+        sock.ws.send(
+          JSON.stringify([
+            sub.joinRef,
+            null,
+            topic,
+            'postgres_changes',
+            {
+              ids: [sub.bindingId],
+              data: {
+                schema: 'public',
+                table: 'messages',
+                commit_timestamp: m.created_at,
+                type: 'INSERT',
+                record: m,
+                columns,
+                errors: null,
+              },
+            },
+          ]),
+        )
+      }
+    }
+  }
+
+  /** Close every live connection (they'll try to reconnect; refused while liveDown). */
+  dropLive() {
+    this.liveDown = true
+    for (const s of this.sockets) s.ws.close({ code: 1006, reason: 'test drop' })
+    this.sockets.clear()
+  }
+
+  restoreLive() {
+    this.liveDown = false
+  }
+
+  /** Insert a message directly (as if sent from another device). */
+  addMessage(spaceId: string, senderId: string, body: string): MockMessage {
+    const m: MockMessage = {
+      id: this.newId(),
+      space_id: spaceId,
+      sender_id: senderId,
+      client_id: crypto.randomUUID(),
+      body,
+      created_at: this.nextTimestamp(),
+    }
+    this.messages.push(m)
+    this.publish(m)
+    return m
+  }
+
+  messagesFor(uid: string, spaceId: string, before?: string, limit = 50) {
+    const space = this.spaces.get(spaceId)
+    if (!space?.members.some((m) => m.user_id === uid)) return []
+    return this.messages
+      .filter((m) => m.space_id === spaceId && (!before || m.created_at < before))
+      .sort((a, b) => b.created_at.localeCompare(a.created_at) || b.id.localeCompare(a.id))
+      .slice(0, limit)
+  }
 
   userFor(email: string, id?: string): string {
     const existing = this.usersByEmail.get(email)
@@ -157,6 +253,32 @@ export class Backend {
         })
         return { invite_token: token, expires_at }
       }
+      case 'send_message': {
+        const spaceId = args.p_space_id as string
+        const clientId = args.p_client_id as string
+        const existing = this.messages.find(
+          (m) => m.space_id === spaceId && m.client_id === clientId,
+        )
+        if (existing) return existing
+        const space = this.spaces.get(spaceId)
+        if (!uid || !space || !space.members.some((m) => m.user_id === uid))
+          return fail('not_member')
+        if (space.status !== 'active') fail('space_closed')
+        const body = String(args.p_body ?? '').trim()
+        if (!body) fail('message_empty')
+        if (body.length > 4000) fail('message_too_long')
+        const m: MockMessage = {
+          id: this.newId(),
+          space_id: spaceId,
+          sender_id: uid,
+          client_id: clientId,
+          body,
+          created_at: this.nextTimestamp(),
+        }
+        this.messages.push(m)
+        this.publish(m)
+        return m
+      }
       case 'leave_space': {
         const space = this.spaces.get(args.p_space_id as string)
         if (!uid || !space || !space.members.some((m) => m.user_id === uid))
@@ -167,6 +289,7 @@ export class Backend {
         if (space.members.length === 0) {
           this.spaces.delete(space.id)
           this.invites = this.invites.filter((i) => i.space_id !== space.id)
+          this.messages = this.messages.filter((m) => m.space_id !== space.id)
           return { deleted: true }
         }
         space.status = 'closed'
@@ -219,6 +342,7 @@ function userFromAuthHeader(header: string | undefined): string | null {
 
 /** Route one browser page's Supabase traffic to a (possibly shared) backend. */
 export async function attachBackend(page: Page, backend: Backend): Promise<void> {
+  await routeRealtime(page, backend)
   const json = (route: Route, status: number, body: unknown) =>
     route.fulfill({ status, contentType: 'application/json', body: JSON.stringify(body) })
 
@@ -300,6 +424,10 @@ export async function attachBackend(page: Page, backend: Backend): Promise<void>
 
     if (url.pathname.startsWith('/rest/v1/rpc/')) {
       const fn = url.pathname.split('/').pop()!
+      if (fn === 'send_message' && backend.failSends > 0) {
+        backend.failSends--
+        return route.abort('internetdisconnected')
+      }
       try {
         const args = (req.postDataJSON() ?? {}) as Record<string, unknown>
         return json(route, 200, backend.rpc(fn, uid, args))
@@ -323,6 +451,14 @@ export async function attachBackend(page: Page, backend: Backend): Promise<void>
       return one({ id: uid, display_name: name })
     }
 
+    if (url.pathname === '/rest/v1/messages') {
+      if (!uid) return json(route, 401, { message: 'permission denied' })
+      const spaceId = url.searchParams.get('space_id')?.replace(/^eq\./, '') ?? ''
+      const before = url.searchParams.get('created_at')?.replace(/^lt\./, '')
+      const limit = Number(url.searchParams.get('limit') ?? 50)
+      return json(route, 200, backend.messagesFor(uid, spaceId, before, limit))
+    }
+
     if (url.pathname === '/rest/v1/spaces') {
       if (!uid) return json(route, 401, { message: 'permission denied' })
       const idFilter = url.searchParams.get('id')?.replace(/^eq\./, '')
@@ -332,6 +468,58 @@ export async function attachBackend(page: Page, backend: Backend): Promise<void>
 
     return json(route, 404, { message: `mock: no route for ${url.pathname}` })
   })
+}
+
+/**
+ * Speaks enough of Supabase Realtime's protocol (Phoenix channels, JSON v2:
+ * [join_ref, ref, topic, event, payload]) for the app's live messages.
+ */
+async function routeRealtime(page: Page, backend: Backend) {
+  const host = new URL(MOCK_SUPABASE_URL).host
+  await page.routeWebSocket(
+    new RegExp(`^wss://${host.replace(/\./g, '\\.')}/realtime/v1/websocket`),
+    (ws) => {
+      if (backend.liveDown) {
+        ws.close({ code: 1006, reason: 'down' })
+        return
+      }
+      const sock: LiveSocket = { ws, uid: null, subs: new Map() }
+      backend.sockets.add(sock)
+      let bindingSeq = 100
+      const reply = (joinRef: string | null, ref: string, topic: string, response: object = {}) =>
+        ws.send(JSON.stringify([joinRef, ref, topic, 'phx_reply', { status: 'ok', response }]))
+
+      ws.onMessage((raw) => {
+        const [joinRef, ref, topic, event, payload] = JSON.parse(String(raw)) as [
+          string | null,
+          string,
+          string,
+          string,
+          Record<string, unknown>,
+        ]
+        if (event === 'heartbeat') return reply(null, ref, topic)
+        if (event === 'access_token') {
+          sock.uid = userFromAuthHeader(`Bearer ${String(payload.access_token ?? '')}`) ?? sock.uid
+          return reply(joinRef, ref, topic)
+        }
+        if (event === 'phx_join') {
+          sock.uid = userFromAuthHeader(`Bearer ${String(payload.access_token ?? '')}`) ?? sock.uid
+          const config = (payload.config ?? {}) as { postgres_changes?: { filter?: string }[] }
+          const changes = (config.postgres_changes ?? []).map((c) => ({ ...c, id: ++bindingSeq }))
+          const first = changes[0]
+          const spaceId = first?.filter?.replace(/^space_id=eq\./, '') ?? ''
+          if (first) sock.subs.set(topic, { joinRef: joinRef ?? '', spaceId, bindingId: first.id })
+          return reply(joinRef, ref, topic, { postgres_changes: changes })
+        }
+        if (event === 'phx_leave') {
+          sock.subs.delete(topic)
+          return reply(joinRef, ref, topic)
+        }
+        return reply(joinRef, ref, topic)
+      })
+      ws.onClose(() => backend.sockets.delete(sock))
+    },
+  )
 }
 
 /**

@@ -2,6 +2,21 @@
 
 Newest first. Each entry: what, why, and what it rules out. Reversible decisions can be revisited; record the change here when they are.
 
+## 2026-11-06
+
+**D-028 · Avatars: DiceBear "Adventurer" style, original names in the picker only.** Owner picked style A (Adventurer, Lisa Wischofsky, CC BY 4.0 — credit to be shown on the Privacy/About page). 8–12 hand-picked characters. Names are original anime-style names (e.g. Kai, Rin, Haru, Sora, Mika, Yuna, Jin, Aiko) rather than franchise character names (owner's first idea; switched to avoid trademark issues). Names appear **only** as labels in the picker; everywhere else the person's own display name is shown.
+
+**D-027 · Colour token `base` renamed `canvas`.** Tailwind generated `text-base` as both a font size and a colour, so anything sized `text-base` could render in the background colour (the chat title was invisible). Renamed to `--color-canvas`.
+
+**D-026 · How chat works (stage 4).**
+
+- _Sending_ goes through `send_message` with a device-generated `client_id`; unconfirmed messages live in a per-tab outbox (sessionStorage) and are re-sent with the same id after a failure, going back online, or a refresh — the server returns the existing message, so no duplicates. "Sent" appears only after the server confirms. Permanent errors (space closed, too long) show a reason instead of a retry loop.
+- _Live updates_ use Supabase Realtime `postgres_changes` on `messages`, filtered to the open space only, cleaned up on leave. After any reconnect the newest page is re-fetched and merged (de-duplicated by `client_id`). If the live connection can't be made within 4 s or drops, the app checks every 5 s until it's back.
+- _History_ loads 50 at a time, newest first; older pages load on scroll to the top without moving the view. New messages scroll into view only if you're at the bottom or sent it; otherwise a "New message" button appears.
+- _Keyboard_: desktop Enter sends, Shift+Enter new line; touch screens: return makes a new line, the button sends and the keyboard stays open; never sends mid-composition (IME). On iOS the chat follows `visualViewport` so the box stays above the keyboard.
+- _Draft_ kept per space for the tab. _Screen readers_ hear new incoming messages only, not the whole history.
+- No typing indicators, read receipts or reactions yet (instructions §3.7: later).
+
 ## 2026-11-05
 
 **D-025 · Sign-in code: 6 digits in six boxes, auto sign-in.** Owner asked for a 4-character letters-and-numbers code. Supabase only issues numeric codes of 6–10 digits, and building a custom code system would mean writing our own generation, checking, expiry and lockouts (a security trade-off) for a weaker code. Agreed instead: Supabase "Email OTP Length" set to 6 (was 8), and a six-box entry (`CodeInput`) — one real field under the boxes, so phone autofill ("From Mail"), password managers and pasting a whole message all work; signs in as soon as the 6th digit arrives. `CODE_LENGTH` in `validation.ts` must match the Supabase setting.

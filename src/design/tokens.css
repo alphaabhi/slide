@@ -9,7 +9,7 @@
    * Near-black base, hairline borders, small colour accents. Names are
    * theme-neutral so accent themes can be added later without renaming classes.
    */
-  --color-base: #0c0c0d; /* app background */
+  --color-canvas: #0c0c0d; /* app background (not "base": that would clash with the text-base size utility) */
   --color-surface: #151516; /* cards, sheets, composer */
   --color-surface-high: #202022; /* their bubbles, hover/pressed surfaces */
   --color-line: #29292c; /* hairline borders, dividers */

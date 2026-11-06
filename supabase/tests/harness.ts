@@ -18,6 +18,7 @@ const SUPABASE_STUB = `
   grant usage on schema auth to anon, authenticated;
   grant execute on function auth.uid() to anon, authenticated;
   grant usage on schema public to anon, authenticated;
+  create publication supabase_realtime;
 `
 
 const migrationsDir = join(import.meta.dirname, '..', 'migrations')

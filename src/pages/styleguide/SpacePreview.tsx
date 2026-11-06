@@ -9,8 +9,13 @@ export function SpacePreview() {
     <div className="mx-auto w-full max-w-[24rem] overflow-hidden rounded-[2rem] border border-line surface-panel">
       <div className="flex items-center gap-3 border-b border-line px-4 py-3">
         <div className="flex -space-x-2">
-          <Avatar name="Abhi" side="you" size="sm" className="ring-2 ring-[var(--color-base)]" />
-          <Avatar name="Meera" side="them" size="sm" className="ring-2 ring-[var(--color-base)]" />
+          <Avatar name="Abhi" side="you" size="sm" className="ring-2 ring-[var(--color-canvas)]" />
+          <Avatar
+            name="Meera"
+            side="them"
+            size="sm"
+            className="ring-2 ring-[var(--color-canvas)]"
+          />
         </div>
         <div className="min-w-0 flex-1">
           <p className="truncate font-display font-bold">Not the Hinge chat</p>

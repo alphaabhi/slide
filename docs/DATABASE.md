@@ -50,6 +50,23 @@ Errors are raised with a stable code as the message (`invite_expired`, `space_fu
 
 **Access (RLS):** members can read their spaces, both member rows, invite status (never `token_hash`) and the other member's profile; members may rename a space. Outsiders and anonymous users see nothing. Internal helpers live in the non-exposed `private` schema.
 
+### Messages (stage 4) — `20261107000000_messages.sql`
+
+| Column                        | Notes                                                                                     |
+| ----------------------------- | ----------------------------------------------------------------------------------------- |
+| `id`, `space_id`, `sender_id` | Sender always from the session; cascade-deleted with the space                            |
+| `client_id`                   | Chosen by the sending device; unique per space, so retries can't duplicate                |
+| `body`                        | 1–4,000 characters, trimmed, not blank, no control characters (newlines and tabs allowed) |
+| `created_at`                  | Server clock                                                                              |
+
+Index `(space_id, created_at desc, id desc)` for history pages; `(sender_id, created_at desc)` for the rate limit.
+
+**`send_message(space, client_id, body)`** — the only way to write. Returns the saved message; if the same `client_id` was already saved (a retry after a dropped connection) it returns that one instead of creating a copy. Refuses: not a member, space closed, empty, too long, more than 20 messages in 10 seconds.
+
+**Access:** members read their space's messages; nobody can insert, edit or delete directly. When someone leaves they lose access to the history; when the last person leaves, the messages are deleted with the space.
+
+**Live updates:** the table is in the `supabase_realtime` publication. Supabase Realtime applies the read policy to each subscriber, so only the two members receive new messages.
+
 ## Planned
 
 | Table                                     | Stage |

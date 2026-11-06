@@ -3,14 +3,14 @@ import { Link, useLocation, useNavigate, useParams } from 'react-router'
 import { BrandLoader } from '@/components/BrandLoader'
 import { Avatar } from '@/components/ui/Avatar'
 import { Button } from '@/components/ui/Button'
-import { Card } from '@/components/ui/Card'
-import { Dialog, DialogClose } from '@/components/ui/Dialog'
 import { Icon } from '@/components/ui/Icon'
 import { useToast } from '@/components/ui/Toast'
 import { useSession } from '@/features/auth/AuthProvider'
 import { RequireAuth, RequireProfile } from '@/features/auth/guards'
 import { useMyProfile } from '@/features/profile/api'
-import { spaceErrorMessage, spaceLabel, useLeaveSpace, useSpace, type Space } from './api'
+import { ChatScreen } from '@/features/chat/ChatScreen'
+import { spaceErrorMessage, spaceLabel, useSpace, type Space } from './api'
+import { LeaveSpace } from './LeaveSpace'
 import { InviteCard } from './InviteCard'
 import { recallInviteToken, rememberInviteToken } from './pendingInvite'
 
@@ -105,6 +105,9 @@ function SpacePage() {
   }
 
   const s = space.data
+  if (s.phase !== 'waiting') {
+    return <ChatScreen space={s} userId={session.user.id} justJoined={flags.justJoined} />
+  }
   return (
     <Shell space={s} myName={myName}>
       {flags.justJoined ? (
@@ -128,33 +131,6 @@ function SpacePage() {
               onToken={setToken}
             />
           </div>
-        </>
-      ) : null}
-
-      {s.phase === 'together' ? (
-        <>
-          <h1 className="text-3xl [overflow-wrap:anywhere]">
-            You & <span className="text-spark">{s.partner?.name}</span>
-          </h1>
-          <Card className="mt-6">
-            <p className="flex items-center gap-2 font-display font-semibold">
-              <Icon name="sparkle" size={16} className="text-gold" />
-              Chat arrives in the next update
-            </p>
-            <p className="mt-1 text-sm text-fg-muted">
-              You’re both in this space. Messages and games will appear right here.
-            </p>
-          </Card>
-        </>
-      ) : null}
-
-      {s.phase === 'closed' ? (
-        <>
-          <h1 className="text-3xl">This space is closed</h1>
-          <p className="mt-3 text-fg-muted">
-            The other person left. You can still look back at this space, but no one can send
-            messages or join it.
-          </p>
         </>
       ) : null}
 
@@ -189,14 +165,14 @@ function Shell({
                 name={myName ?? 'You'}
                 side="you"
                 size="sm"
-                className="ring-2 ring-[var(--color-base)]"
+                className="ring-2 ring-[var(--color-canvas)]"
               />
               {space.partner ? (
                 <Avatar
                   name={space.partner.name}
                   side="them"
                   size="sm"
-                  className="ring-2 ring-[var(--color-base)]"
+                  className="ring-2 ring-[var(--color-canvas)]"
                 />
               ) : null}
             </div>
@@ -213,54 +189,6 @@ function WelcomeBanner({ text }: { text: string }) {
   return (
     <div className="slide-pop mb-6 rounded-card border border-line surface-panel px-4 py-3 font-display font-semibold">
       {text}
-    </div>
-  )
-}
-
-function LeaveSpace({ space, userId }: { space: Space; userId: string }) {
-  const leave = useLeaveSpace(space.id, userId)
-  const navigate = useNavigate()
-  const toast = useToast()
-  const [error, setError] = useState<string>()
-
-  const explanation =
-    space.phase === 'together'
-      ? `You’ll lose access straight away. ${space.partner?.name ?? 'The other person'} keeps what’s already here, but the space closes: no new messages, and no one can join.`
-      : space.phase === 'waiting'
-        ? 'Nobody else has joined, so the space and its invite link will be deleted.'
-        : 'You’re the last person here, so the space and everything in it will be deleted.'
-
-  async function confirm() {
-    try {
-      await leave.mutateAsync()
-      toast.show({ title: 'You left the space' })
-      navigate('/home', { replace: true })
-    } catch (err) {
-      setError(spaceErrorMessage(err))
-    }
-  }
-
-  return (
-    <div className="mt-12 border-t border-line pt-6">
-      <Dialog
-        title={space.phase === 'together' ? 'Leave this space?' : 'Delete this space?'}
-        description={explanation}
-        trigger={
-          <Button variant="danger" size="sm">
-            {space.phase === 'together' ? 'Leave space' : 'Delete space'}
-          </Button>
-        }
-      >
-        <div className="grid gap-3">
-          {error ? <p className="text-sm text-danger">{error}</p> : null}
-          <Button variant="danger" loading={leave.isPending} onClick={() => void confirm()}>
-            {space.phase === 'together' ? 'Leave space' : 'Delete space'}
-          </Button>
-          <DialogClose asChild>
-            <Button variant="ghost">Keep it</Button>
-          </DialogClose>
-        </div>
-      </Dialog>
     </div>
   )
 }
