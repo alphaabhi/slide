@@ -52,6 +52,8 @@ Sending domain: **`mail.slidedm.space`** (domain `slidedm.space`, registered at 
 - Email OTP length: **6** (must match `CODE_LENGTH` in `src/features/auth/validation.ts`)
 - Email OTP expiration: **3600** seconds (1 hour) is fine
 
+**Authentication → Rate Limits**: check the email-sending limit is comfortably above expected sign-ins per hour (Resend free allows 100 emails/day).
+
 ## 5. Site URL
 
 **Authentication → URL Configuration → Site URL**: `https://slidedm.space`.

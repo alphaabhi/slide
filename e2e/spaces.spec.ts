@@ -78,12 +78,15 @@ test('two people: create → invite → join → both inside → outsider reject
   await meera.getByLabel('Display name').fill('Meera')
   await meera.getByRole('button', { name: 'Continue' }).click()
   await meera.getByRole('button', { name: 'Join Abhi' }).click()
-  await expect(meera.getByRole('heading', { name: 'You & Abhi' })).toBeVisible()
+  // Joined: straight into the chat with Abhi
+  await expect(meera.getByRole('textbox', { name: 'Message Abhi' })).toBeVisible()
   await expect(meera.getByText('You’re in. Say hi to Abhi')).toBeVisible()
   await expectNoSeriousA11y(meera)
 
   // Abhi's waiting screen notices without a refresh
-  await expect(abhi.getByRole('heading', { name: 'You & Meera' })).toBeVisible({ timeout: 15_000 })
+  await expect(abhi.getByRole('textbox', { name: 'Message Meera' })).toBeVisible({
+    timeout: 15_000,
+  })
   await expect(abhi.getByText('Meera slid in 🎉', { exact: true })).toBeVisible()
 
   // A third person with the same link is turned away
@@ -102,6 +105,7 @@ test('two people: create → invite → join → both inside → outsider reject
   await expect(abhi.getByRole('link', { name: /Not the Hinge chat.*With Meera/ })).toBeVisible()
 
   // Meera leaves; Abhi's space becomes closed and Meera loses it
+  await meera.getByRole('button', { name: 'Space options' }).click()
   await meera.getByRole('button', { name: 'Leave space' }).click()
   const confirm = meera.getByRole('dialog', { name: 'Leave this space?' })
   await expect(confirm.getByText(/Abhi keeps what’s already here/)).toBeVisible()

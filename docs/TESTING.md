@@ -19,6 +19,20 @@ Viewports: iPhone SE (375×667), Pixel 7 (412×915), tablet 768×1024, desktop 1
 | Accessibility | axe via Playwright                 | WCAG 2.1 AA; serious or critical violations fail the build                            |
 | Performance   | Lighthouse (from stage 7)          | Mobile perf ≥ 90, a11y ≥ 95 targets                                                   |
 
+## Verified — 2026-11-06 (stage 4: chat)
+
+- `npm run check`: **113 tests** — 14 new database tests for messages (members send/read in order; server time; trimming, empty, 4,000-char limit, control characters; retry with the same id returns the original; ids can't be hijacked; outsiders and signed-out users blocked; spaces isolated; no direct insert/edit/delete or impersonation; flood limit; leaving keeps history for the other person but stops sending; last leaver deletes; published for Realtime) and 6 for chat logic (merge/de-dupe/order, day separators and runs, Enter rules incl. IME).
+- Playwright: **78 pass** (30 skipped by design: multi-person journeys run once). New chat journeys use two browsers and a test backend that speaks Supabase Realtime's protocol (`e2e/mock-supabase.ts`):
+  - live both ways; starters fill the box; desktop Enter sends, Shift+Enter new line; Hindi + emoji; same order for both and after refresh; "Sent" only after confirmation; no serious accessibility issues
+  - failed send → Not sent → Retry → delivered once
+  - offline → banner → message waits → sends itself when back, once
+  - live connection dropped → "Reconnecting…" → messages still arrive via fallback; nothing duplicated after reconnect
+  - 120-message history opens at newest with 50 loaded; scrolling up loads the rest
+  - reading older messages: new one shows a "New message" button instead of jumping
+  - other person leaves → history readable, sending disabled
+- Found and fixed by screenshots: chat title rendered black-on-black (D-027); offline notice truncated (moved to a full-width strip).
+- **Not yet verified:** real Supabase Realtime, real iPhone keyboard behaviour, delivery latency (median/p95) — to measure on the live site.
+
 ## Verified — 2026-11-05 (code entry)
 
 - 93 unit/database tests and 71 browser tests pass. New: six-box code field is one labelled input with `autocomplete="one-time-code"`; keeps digits only; signs in on the 6th digit; pasting "Code: 424 242" works (a test caught that a `maxlength` cap broke this — removed).

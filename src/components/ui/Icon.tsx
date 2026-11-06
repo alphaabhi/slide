@@ -15,6 +15,19 @@ const paths = {
   ),
   close: <path d="M6 6l12 12M18 6 6 18" />,
   back: <path d="M19 12H6M12 18l-6-6 6-6" />,
+  more: (
+    <>
+      <circle cx="5" cy="12" r="1.5" />
+      <circle cx="12" cy="12" r="1.5" />
+      <circle cx="19" cy="12" r="1.5" />
+    </>
+  ),
+  wifiOff: (
+    <>
+      <path d="M2 2l20 20" />
+      <path d="M8.5 16.5a5 5 0 0 1 7 0M5 13a10 10 0 0 1 5.2-2.8M19 13a10 10 0 0 0-2-1.4M12 20h.01" />
+    </>
+  ),
   copy: (
     <>
       <rect x="8" y="8" width="12" height="12" rx="2.5" />

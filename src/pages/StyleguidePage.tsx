@@ -21,7 +21,7 @@ import { SpacePreview } from './styleguide/SpacePreview'
  */
 
 const swatches = [
-  { name: 'Base', token: '--color-base', role: 'Background' },
+  { name: 'Base', token: '--color-canvas', role: 'Background' },
   { name: 'Surface', token: '--color-surface', role: 'Cards, composer' },
   { name: 'Surface high', token: '--color-surface-high', role: 'Their bubbles, hover' },
   { name: 'Line', token: '--color-line', role: 'Borders' },
