@@ -81,16 +81,16 @@ test('two people chat live: messages arrive instantly, in order, and persist', a
 
   // Empty state with conversation starters
   await expect(meera.getByRole('heading', { name: 'Say hi to Abhi' })).toBeVisible()
-  await meera
-    .getByRole('button', { name: 'What’s your most dangerously charming quality?' })
-    .click()
-  await expect(meera.getByRole('textbox', { name: 'Message Abhi' })).toHaveValue(
-    'What’s your most dangerously charming quality?',
-  )
+  // Three starters, the same three for both people in this space; tapping one fills the box.
+  const starters = meera.getByRole('list', { name: 'Conversation starters' }).getByRole('button')
+  await expect(starters).toHaveCount(3)
+  const starter = (await starters.first().innerText()).trim()
+  await starters.first().click()
+  await expect(meera.getByRole('textbox', { name: 'Message Abhi' })).toHaveValue(starter)
   await meera.getByRole('button', { name: 'Send message' }).click()
 
   // Abhi (on desktop) sees it live, then replies with Enter; Shift+Enter makes a new line
-  await expect(list(abhi).getByText('What’s your most dangerously charming quality?')).toBeVisible({
+  await expect(list(abhi).getByText(starter)).toBeVisible({
     timeout: 5_000,
   })
   const box = abhi.getByRole('textbox', { name: 'Message Meera' })
@@ -110,12 +110,7 @@ test('two people chat live: messages arrive instantly, in order, and persist', a
   await expect(list(abhi).getByText('नमस्ते 🌸 très bien')).toBeVisible({ timeout: 5_000 })
 
   // Same order for both, and it survives a refresh
-  const expected = [
-    'What’s your most dangerously charming quality?',
-    'chai, obviously',
-    'line one\nline two',
-    'नमस्ते 🌸 très bien',
-  ]
+  const expected = [starter, 'chai, obviously', 'line one\nline two', 'नमस्ते 🌸 très bien']
   const bodies = async (p: Page) =>
     (await list(p).locator('.slide-bubble').allInnerTexts()).map((t) => t.trim())
   expect(await bodies(abhi)).toEqual(expected)

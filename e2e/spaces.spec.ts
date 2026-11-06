@@ -30,7 +30,7 @@ async function expectNoSeriousA11y(page: Page) {
   ).toEqual([])
 }
 
-async function createSpace(page: Page, title = 'All banter welcome') {
+async function createSpace(page: Page, title = 'No small talk zone') {
   await page.getByRole('button', { name: 'New space' }).click()
   const dialog = page.getByRole('dialog', { name: 'Create a space' })
   await dialog.getByLabel('Name your space (optional)').fill(title)
@@ -68,7 +68,7 @@ test('two people: create → invite → join → both inside → outsider reject
   await expect(
     meera.getByRole('heading', { name: /Abhi wants to take the conversation/ }),
   ).toBeVisible()
-  await expect(meera.getByText('All banter welcome')).toBeVisible()
+  await expect(meera.getByText('No small talk zone')).toBeVisible()
   await expectNoSeriousA11y(meera)
 
   // …signs up, picks a name, comes straight back and joins
@@ -102,7 +102,7 @@ test('two people: create → invite → join → both inside → outsider reject
 
   // Both see the space on home with the right label
   await abhi.goto('/home')
-  await expect(abhi.getByRole('link', { name: /All banter welcome.*With Meera/ })).toBeVisible()
+  await expect(abhi.getByRole('link', { name: /No small talk zone.*With Meera/ })).toBeVisible()
 
   // Meera leaves; Abhi's space becomes closed and Meera loses it
   await meera.getByRole('button', { name: 'Space options' }).click()
@@ -113,7 +113,7 @@ test('two people: create → invite → join → both inside → outsider reject
   await expect(meera).toHaveURL(/\/home$/)
   await expect(meera.getByText('No spaces yet')).toBeVisible()
   await abhi.reload()
-  await expect(abhi.getByRole('link', { name: /All banter welcome.*Closed/ })).toBeVisible()
+  await expect(abhi.getByRole('link', { name: /No small talk zone.*Closed/ })).toBeVisible()
 })
 
 test('your own link, a fresh link, a cancelled link and a made-up link', async ({ browser }) => {

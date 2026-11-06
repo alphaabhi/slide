@@ -4,6 +4,8 @@ Newest first. Each entry: what, why, and what it rules out. Reversible decisions
 
 ## 2026-11-06
 
+**D-030 · Copy: "No small talk zone"; 18 conversation starters, three per space.** Owner found "Not the Hinge chat" and the original starters flat. Space-name placeholder is now "No small talk zone" (owner's choice). Empty chats show three starters from a pool of 18 (`src/features/chat/starters.ts`) in the owner's tone: playful, curious, a little cheeky, never explicit. The three are chosen from the space id, so both people see the same ones and they don't reshuffle on refresh; different spaces get different sets.
+
 **D-029 · Avatars beside messages; picker pictures load eagerly.** Owner asked (real-phone test, 2026-11-06) for each message to show its sender's small avatar, both sides. It sits beside the last bubble of each run (like iMessage/Messenger), so a burst of messages shows one picture, not one per bubble; people without an avatar show their initial. The picker's images were `loading="lazy"`, which iOS Safari can leave blank inside the animating, scrolling sheet until reopened; they now load eagerly, are preloaded in the background on home and the name step (~40 KB, once), are SVGO-optimised, and are cached for 7 days.
 
 **D-028 · Avatars: DiceBear "Adventurer" style, original names in the picker only.** Owner picked style A (Adventurer, Lisa Wischofsky, CC BY 4.0 — credit to be shown on the Privacy/About page). 8–12 hand-picked characters. Names are original anime-style names (e.g. Kai, Rin, Haru, Sora, Mika, Yuna, Jin, Aiko) rather than franchise character names (owner's first idea; switched to avoid trademark issues). Names appear **only** as labels in the picker; everywhere else the person's own display name is shown.

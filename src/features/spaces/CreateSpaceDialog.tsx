@@ -44,7 +44,7 @@ export function CreateSpaceDialog({ userId, trigger }: { userId: string; trigger
       <form onSubmit={submit} noValidate className="grid gap-4">
         <Input
           label="Name your space (optional)"
-          placeholder="All banter welcome"
+          placeholder="No small talk zone"
           maxLength={80}
           value={title}
           onChange={(e) => setTitle(e.target.value)}

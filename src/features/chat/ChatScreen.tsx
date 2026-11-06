@@ -11,13 +11,8 @@ import { useLiveMessages, useMessageHistory, useOutbox, type LiveStatus } from '
 import { Composer, type ComposerHandle } from './Composer'
 import { MessageList } from './MessageList'
 import { mergeMessages, type Message } from './model'
+import { pickStarters } from './starters'
 import { useViewportFit } from './useViewportFit'
-
-const STARTERS = [
-  'What’s something you’ve always wanted to do but need the right partner in crime for?',
-  'What’s more seductive: a brilliant mind, effortless confidence or wicked humour?',
-  'What’s your most dangerously charming quality?',
-]
 
 export function ChatScreen({
   space,
@@ -149,6 +144,7 @@ export function ChatScreen({
             <EmptyChat
               partnerName={partnerName}
               closed={closed}
+              spaceId={space.id}
               onPick={(t) => composer.current?.insert(t)}
             />
           }
@@ -211,12 +207,15 @@ function ConnectionBanner({ status }: { status: LiveStatus }) {
 function EmptyChat({
   partnerName,
   closed,
+  spaceId,
   onPick,
 }: {
   partnerName: string
   closed: boolean
+  spaceId: string
   onPick: (t: string) => void
 }) {
+  const starters = useMemo(() => pickStarters(spaceId), [spaceId])
   return (
     <div className="mx-auto flex h-full max-w-sm flex-col items-center justify-center py-8 text-center">
       <p className="text-4xl" aria-hidden="true">
@@ -236,8 +235,8 @@ function EmptyChat({
           <p className="mt-2 text-sm text-fg-muted">
             This is the start of your space. Stuck? Tap one to use it.
           </p>
-          <ul className="mt-5 grid w-full gap-2">
-            {STARTERS.map((s) => (
+          <ul aria-label="Conversation starters" className="mt-5 grid w-full gap-2">
+            {starters.map((s) => (
               <li key={s}>
                 <button
                   type="button"
