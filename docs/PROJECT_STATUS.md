@@ -10,7 +10,7 @@ _Last updated: 2026-11-06_
 | 1   | Design system                                    | **Done**. Awaiting product-owner review of `/styleguide`.                                                                                      |
 | 2   | Auth & profiles (email code)                     | **Done**. Verified on the live site with several real email addresses.                                                                         |
 | 3   | Spaces & invitations                             | **Done** — live on slidedm.space 2026-11-05. Needs a real two-phone check by the owner.                                                        |
-| 4   | Messaging core                                   | **Built and tested** (branch `stage-4-chat`). Goes live once the messages migration is run.                                                    |
+| 4   | Messaging core                                   | **Done** — live on slidedm.space 2026-11-06. Needs a real two-phone check (incl. airplane mode) by the owner.                                  |
 | 5   | Network resilience                               | **Mostly done within stage 4** (offline, retry, reconnect, no duplicates). Remaining: real-device slow-network checks and latency measurement. |
 | 6   | Activities                                       | Not started                                                                                                                                    |
 | 7   | Personalisation, landing, legal pages            | Not started                                                                                                                                    |
