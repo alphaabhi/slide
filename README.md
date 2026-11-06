@@ -44,6 +44,7 @@ If Playwright's bundled browser isn't installed, point it at a system Chrome: `P
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — structure and technical decisions
 - [`docs/DESIGN_SYSTEM.md`](docs/DESIGN_SYSTEM.md) — tokens, components, usage rules
 - [`docs/DATABASE.md`](docs/DATABASE.md) — schema and access policies
+- [`docs/HOSTING_AND_LIMITS.md`](docs/HOSTING_AND_LIMITS.md) — where data lives, how a message travels, free-plan limits
 - [`docs/SUPABASE_SETUP.md`](docs/SUPABASE_SETUP.md) — one-time Supabase settings and how to run migrations
 - [`docs/TESTING.md`](docs/TESTING.md) — how to test and what has been verified
 
