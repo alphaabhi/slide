@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router'
 import { Avatar } from '@/components/ui/Avatar'
 import { Button } from '@/components/ui/Button'
@@ -14,7 +14,7 @@ import { RequireAuth, RequireProfile } from '@/features/auth/guards'
 import { displayNameSchema, firstError } from '@/features/auth/validation'
 import { useMyProfile, useSaveProfile, type Profile } from '@/features/profile/api'
 import { AvatarPicker } from '@/features/profile/AvatarPicker'
-import { isAvatarKey, type AvatarKey } from '@/features/profile/avatars'
+import { isAvatarKey, preloadAvatars, type AvatarKey } from '@/features/profile/avatars'
 import { initialOf } from '@/lib/initials'
 import { CreateSpaceDialog } from '@/features/spaces/CreateSpaceDialog'
 import { SpacesList } from '@/features/spaces/SpacesList'
@@ -37,6 +37,8 @@ function HomePage() {
   const navigate = useNavigate()
   const profile = useMyProfile(session.user.id).data as Profile // guaranteed by <RequireProfile>
   const [signingOut, setSigningOut] = useState(false)
+  // So the Edit profile picker opens with its pictures ready.
+  useEffect(preloadAvatars, [])
 
   async function handleSignOut() {
     setSigningOut(true)

@@ -18,6 +18,8 @@ export function MessageList({
   onLoadOlder,
   onRetry,
   empty,
+  me,
+  them,
 }: {
   messages: ChatMessage[]
   hasOlder: boolean
@@ -25,6 +27,9 @@ export function MessageList({
   onLoadOlder: () => void
   onRetry: (clientId: string) => void
   empty: React.ReactNode
+  /** Shown beside your messages and theirs. Pass stable objects (memoised). */
+  me?: { name: string; avatar?: string | null }
+  them?: { name: string; avatar?: string | null }
 }) {
   const scroller = useRef<HTMLDivElement>(null)
   const topSentinel = useRef<HTMLDivElement>(null)
@@ -119,6 +124,7 @@ export function MessageList({
                     dateTime={row.message.createdAt}
                     status={row.message.mine ? row.message.status : undefined}
                     isLast={row.isLastInRun}
+                    author={row.message.mine ? me : them}
                     onRetry={
                       row.message.error && !row.message.error.includes('Wait a moment')
                         ? undefined

@@ -53,6 +53,13 @@ export function ChatScreen({
   )
   const loadOlder = useCallback(() => void history.fetchNextPage(), [history])
   const closed = space.phase === 'closed'
+  const myAvatar = me?.avatar ?? null
+  const meAuthor = useMemo(() => ({ name: myName, avatar: myAvatar }), [myName, myAvatar])
+  const theirAvatar = space.partner?.avatar ?? null
+  const themAuthor = useMemo(
+    () => ({ name: partnerName, avatar: theirAvatar }),
+    [partnerName, theirAvatar],
+  )
 
   return (
     <div ref={shell} className="fixed inset-x-0 top-0 flex h-dvh flex-col bg-canvas">
@@ -136,6 +143,8 @@ export function ChatScreen({
           loadingOlder={history.isFetchingNextPage}
           onLoadOlder={loadOlder}
           onRetry={outbox.retry}
+          me={meAuthor}
+          them={themAuthor}
           empty={
             <EmptyChat
               partnerName={partnerName}

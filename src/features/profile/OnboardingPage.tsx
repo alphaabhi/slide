@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { Navigate, useNavigate, useSearchParams } from 'react-router'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Field'
@@ -11,7 +11,7 @@ import { displayNameSchema, firstError, safeNext } from '@/features/auth/validat
 import { useMyProfile, useSaveProfile } from './api'
 import { Avatar } from '@/components/ui/Avatar'
 import { AvatarPicker } from './AvatarPicker'
-import type { AvatarKey } from './avatars'
+import { preloadAvatars, type AvatarKey } from './avatars'
 import { initialOf } from '@/lib/initials'
 
 /** First sign-in: choose the name the other person will see. */
@@ -32,6 +32,7 @@ function OnboardingPage() {
   const save = useSaveProfile(session.user.id, false)
   const [value, setValue] = useState('')
   const [avatar, setAvatar] = useState<AvatarKey | null>(null)
+  useEffect(preloadAvatars, [])
   const [error, setError] = useState<string>()
 
   if (profile.isPending) return <BrandLoader />

@@ -1,6 +1,6 @@
 import { memo } from 'react'
 import { cn } from '@/lib/cn'
-import type { Side } from './Avatar'
+import { Avatar, type Side } from './Avatar'
 import { Icon } from './Icon'
 
 export type DeliveryStatus = 'sending' | 'sent' | 'failed'
@@ -17,6 +17,11 @@ export interface MessageBubbleProps {
   /** Last bubble in a run from the same sender — gets the tail corner and the meta row. */
   isLast?: boolean
   onRetry?: () => void
+  /**
+   * Who sent it. When given, their avatar sits beside the last bubble of each
+   * run (earlier bubbles in the run keep the same indent). Pass a stable object.
+   */
+  author?: { name: string; avatar?: string | null }
 }
 
 const statusLabel: Record<DeliveryStatus, string> = {
@@ -37,6 +42,7 @@ export const MessageBubble = memo(function MessageBubble({
   status,
   isLast = true,
   onRetry,
+  author,
 }: MessageBubbleProps) {
   const mine = side === 'you'
   const failed = status === 'failed'
@@ -45,28 +51,38 @@ export const MessageBubble = memo(function MessageBubble({
     <div
       className={cn('flex flex-col', mine ? 'items-end' : 'items-start', isLast ? 'mb-3' : 'mb-1')}
     >
-      <div
-        className={cn(
-          'slide-bubble max-w-[min(80%,34rem)] whitespace-pre-wrap rounded-bubble px-4 py-2.5 text-base [overflow-wrap:anywhere]',
-          failed
-            ? 'bg-danger-surface text-fg outline outline-1 outline-danger/60'
-            : mine
-              ? 'bg-you text-you-ink'
-              : 'bg-surface-high text-fg',
-          isLast &&
-            (mine
-              ? 'rounded-br-[var(--radius-bubble-tail)]'
-              : 'rounded-bl-[var(--radius-bubble-tail)]'),
-          status === 'sending' && 'opacity-70',
-        )}
-      >
-        {body}
+      <div className={cn('flex w-full items-end gap-2', mine && 'flex-row-reverse')}>
+        {author ? (
+          isLast ? (
+            <Avatar name={author.name} avatar={author.avatar} side={side} size="sm" />
+          ) : (
+            <span aria-hidden="true" className="w-7 shrink-0" />
+          )
+        ) : null}
+        <div
+          className={cn(
+            'slide-bubble max-w-[min(80%,34rem)] whitespace-pre-wrap rounded-bubble px-4 py-2.5 text-base [overflow-wrap:anywhere]',
+            failed
+              ? 'bg-danger-surface text-fg outline outline-1 outline-danger/60'
+              : mine
+                ? 'bg-you text-you-ink'
+                : 'bg-surface-high text-fg',
+            isLast &&
+              (mine
+                ? 'rounded-br-[var(--radius-bubble-tail)]'
+                : 'rounded-bl-[var(--radius-bubble-tail)]'),
+            status === 'sending' && 'opacity-70',
+          )}
+        >
+          {body}
+        </div>
       </div>
 
       {isLast || failed ? (
         <div
           className={cn(
             'font-meta mt-1 flex items-center gap-2 px-1 text-xs',
+            author && (mine ? 'mr-9' : 'ml-9'),
             failed ? 'text-danger' : 'text-fg-muted',
           )}
         >

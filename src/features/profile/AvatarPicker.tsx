@@ -1,6 +1,7 @@
 import { Icon } from '@/components/ui/Icon'
 import { cn } from '@/lib/cn'
-import { AVATAR_CREDIT, AVATARS, avatarSrc, type AvatarKey } from './avatars'
+import { useEffect } from 'react'
+import { AVATAR_CREDIT, AVATARS, avatarSrc, preloadAvatars, type AvatarKey } from './avatars'
 
 /**
  * Choose an avatar (optional). The character names appear only here, as
@@ -16,6 +17,7 @@ export function AvatarPicker({
   /** Shown on the "no avatar" option. */
   initial: string
 }) {
+  useEffect(preloadAvatars, [])
   return (
     <fieldset className="grid gap-3">
       <legend className="mb-2 text-sm font-semibold text-fg">
@@ -48,7 +50,6 @@ export function AvatarPicker({
               alt=""
               width={64}
               height={64}
-              loading="lazy"
               decoding="async"
               className="size-full"
             />

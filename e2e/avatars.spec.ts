@@ -84,6 +84,19 @@ test('avatars: chosen at sign-up, seen by the other person, changeable, names st
   await expect(avatarImg(meera, 'kai')).toBeVisible()
   expect(await visibleTextOutsidePicker(meera)).not.toMatch(/\bKai\b/)
 
+  // Each message has its sender's picture beside it: Abhi's avatar, Meera's initial.
+  const spaceId = [...backend.spaces.keys()][0]!
+  backend.addMessage(spaceId, backend.usersByEmail.get('abhi@example.com')!, 'hey you')
+  await meera.getByRole('textbox', { name: 'Message Abhi' }).fill('hi!')
+  await meera.getByRole('button', { name: 'Send message' }).click()
+  const messages = meera.getByRole('list', { name: 'Messages' })
+  await expect(messages.getByText('hey you')).toBeVisible()
+  await expect(messages.getByText('Sent')).toBeVisible()
+  await expect(messages.locator('img[src="/avatars/kai.svg"]')).toHaveCount(1)
+  await expect(
+    messages.locator('li', { hasText: 'hi!' }).getByText('M', { exact: true }),
+  ).toBeVisible()
+
   // Abhi changes his avatar from home; Meera's list shows the new one.
   await abhi.goto('/home')
   await abhi.getByRole('button', { name: 'Edit' }).click()
