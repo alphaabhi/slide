@@ -63,6 +63,8 @@ Animations, loading moments and emoji that make onboarding and activities feel p
 
 ## Live
 
+Deploys: every push to `main` deploys to production automatically. (2026-11-05: auto-deploys stopped after ~23:30 IST for two pushes; fixed by reconnecting the repo in Vercel → Settings → Git on 2026-11-06. If a push shows no "Vercel" check on GitHub within a few minutes, deploy manually from Vercel → Deployments → ⋯ → Create Deployment → `main`.)
+
 Production: **https://slidedm.space** (Vercel, from `main`). `www.slidedm.space` redirects (308) to it; `slide-three-xi.vercel.app` also still serves production.
 
 ## Platform
