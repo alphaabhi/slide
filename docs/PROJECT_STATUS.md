@@ -4,19 +4,19 @@ _Last updated: 2026-11-06_
 
 ## Stage overview
 
-| #   | Stage                                            | Status                                                                                                                                                |
-| --- | ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 0   | Foundations                                      | **Done** (local). Waiting on GitHub/Supabase/Vercel accounts to connect.                                                                              |
-| 1   | Design system                                    | **Done**. Awaiting product-owner review of `/styleguide`.                                                                                             |
-| 2   | Auth & profiles (email code)                     | **Done**. Verified on the live site with several real email addresses.                                                                                |
-| 3   | Spaces & invitations                             | **Done** — live on slidedm.space 2026-11-05. Needs a real two-phone check by the owner.                                                               |
-| 4   | Messaging core                                   | **Done** — live on slidedm.space 2026-11-06. Needs a real two-phone check (incl. airplane mode) by the owner.                                         |
-| —   | Avatars                                          | **Done** — live on slidedm.space 2026-11-06 (SQL run by owner).                                                                                       |
-| 5   | Network resilience                               | **Mostly done within stage 4** (offline, retry, reconnect, no duplicates). Remaining: real-device slow-network checks and latency measurement.        |
-| 6   | Activities                                       | **Built** on branch `activities` (local, not pushed) 2026-11-06. Waiting for the owner's testing; then run `20261109000000_activities.sql` and merge. |
-| 7   | Personalisation, landing, legal pages            | Not started                                                                                                                                           |
-| 8   | Hardening (security, a11y, performance, devices) | Not started                                                                                                                                           |
-| 9   | Private beta                                     | Not started                                                                                                                                           |
+| #   | Stage                                            | Status                                                                                                                                         |
+| --- | ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0   | Foundations                                      | **Done** (local). Waiting on GitHub/Supabase/Vercel accounts to connect.                                                                       |
+| 1   | Design system                                    | **Done**. Awaiting product-owner review of `/styleguide`.                                                                                      |
+| 2   | Auth & profiles (email code)                     | **Done**. Verified on the live site with several real email addresses.                                                                         |
+| 3   | Spaces & invitations                             | **Done** — live on slidedm.space 2026-11-05. Needs a real two-phone check by the owner.                                                        |
+| 4   | Messaging core                                   | **Done** — live on slidedm.space 2026-11-06. Needs a real two-phone check (incl. airplane mode) by the owner.                                  |
+| —   | Avatars                                          | **Done** — live on slidedm.space 2026-11-06 (SQL run by owner).                                                                                |
+| 5   | Network resilience                               | **Mostly done within stage 4** (offline, retry, reconnect, no duplicates). Remaining: real-device slow-network checks and latency measurement. |
+| 6   | Activities                                       | **Done** — live on slidedm.space 2026-11-06 (owner-tested; SQL run).                                                                           |
+| 7   | Personalisation, landing, legal pages            | Not started                                                                                                                                    |
+| 8   | Hardening (security, a11y, performance, devices) | Not started                                                                                                                                    |
+| 9   | Private beta                                     | Not started                                                                                                                                    |
 
 ## Done
 
