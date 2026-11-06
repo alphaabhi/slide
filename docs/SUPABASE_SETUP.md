@@ -8,12 +8,13 @@ Do these once, in order. Never share the database password or the **secret / ser
 
 Supabase dashboard → **SQL Editor** → **New query**. Paste the contents of each file in `supabase/migrations/`, oldest first, and press **Run**. Each should end with "Success. No rows returned".
 
-| File                                        | Stage   | Status           |
-| ------------------------------------------- | ------- | ---------------- |
-| `20261105000000_profiles.sql`               | 2       | Run              |
-| `20261106000000_spaces_and_invitations.sql` | 3       | Run              |
-| `20261107000000_messages.sql`               | 4       | Run (2026-11-06) |
-| `20261108000000_avatars.sql`                | avatars | Run (2026-11-06) |
+| File                                        | Stage   | Status                                 |
+| ------------------------------------------- | ------- | -------------------------------------- |
+| `20261105000000_profiles.sql`               | 2       | Run                                    |
+| `20261106000000_spaces_and_invitations.sql` | 3       | Run                                    |
+| `20261107000000_messages.sql`               | 4       | Run (2026-11-06)                       |
+| `20261108000000_avatars.sql`                | avatars | Run (2026-11-06)                       |
+| `20261109000000_activities.sql`             | 6       | **To run** (after the owner's testing) |
 
 Never edit a migration that has already been run; changes always come as a new file.
 

@@ -1,14 +1,9 @@
 import { cn } from '@/lib/cn'
 import { Button } from './Button'
+import { activityLabel, type ActivityKind } from './activityLabels'
 import { Icon } from './Icon'
 
-export type ActivityKind = 'would-you-rather' | 'this-or-that' | 'question-of-the-day'
-
-const kindLabel: Record<ActivityKind, string> = {
-  'would-you-rather': 'Would you rather',
-  'this-or-that': 'This or that',
-  'question-of-the-day': 'Question of the day',
-}
+export type { ActivityKind }
 
 export interface ActivityOption {
   id: string
@@ -17,7 +12,8 @@ export interface ActivityOption {
 
 export interface ActivityCardProps {
   kind: ActivityKind
-  prompt: string
+  /** A question above the options. Omit when the options say it all. */
+  prompt?: string
   options: ActivityOption[]
   youName: string
   themName: string
@@ -28,8 +24,13 @@ export interface ActivityCardProps {
   /** True when the partner has answered but the answer is still hidden. */
   theyAnswered?: boolean
   busy?: boolean
+  /** Small line under the title, e.g. who started it. */
+  meta?: string
   onChoose?: (optionId: string) => void
   onSkip?: () => void
+  /** After the reveal: play another round of the same game. */
+  onNext?: () => void
+  nextBusy?: boolean
 }
 
 /**
@@ -46,28 +47,38 @@ export function ActivityCard({
   theirChoice,
   theyAnswered = false,
   busy = false,
+  meta,
   onChoose,
   onSkip,
+  onNext,
+  nextBusy = false,
 }: ActivityCardProps) {
   const revealed = yourChoice !== undefined && theirChoice !== undefined
   const matched = revealed && yourChoice === theirChoice
+  const label = activityLabel[kind]
 
   let statusText: string
-  if (revealed) statusText = matched ? 'Same pick. Interesting.' : 'Different picks. Discuss.'
+  if (revealed) statusText = matched ? 'Same pick. Interesting… ✨' : 'Different picks. Discuss.'
   else if (yourChoice) statusText = `Waiting for ${themName} to choose`
   else if (theyAnswered) statusText = `${themName} has chosen. Your turn.`
   else statusText = 'Pick one. Answers show when you both have.'
 
   return (
     <section
-      aria-label={kindLabel[kind]}
-      className="relative overflow-hidden rounded-card border border-line surface-panel p-5"
+      aria-label={label}
+      className={cn(
+        'relative overflow-hidden rounded-card border surface-panel p-5',
+        matched ? 'border-glow/60 slide-match' : 'border-line',
+      )}
     >
       <div className="flex items-center justify-between gap-3">
-        <p className="label-meta inline-flex items-center gap-1.5 text-gold">
-          <Icon name="sparkle" size={14} />
-          {kindLabel[kind]}
-        </p>
+        <div className="min-w-0">
+          <h3 className="label-meta inline-flex items-center gap-1.5 text-gold">
+            <Icon name="sparkle" size={14} />
+            {label}
+          </h3>
+          {meta ? <p className="mt-0.5 truncate text-xs text-fg-muted">{meta}</p> : null}
+        </div>
         {onSkip && !revealed ? (
           <Button variant="ghost" size="sm" onClick={onSkip} className="-mr-3 text-fg-muted">
             <Icon name="skip" size={16} />
@@ -76,9 +87,9 @@ export function ActivityCard({
         ) : null}
       </div>
 
-      <h3 className="mt-3 text-2xl">{prompt}</h3>
+      {prompt ? <p className="mt-3 font-display text-2xl font-semibold">{prompt}</p> : null}
 
-      <div className="mt-5 grid gap-3" role="group" aria-label="Choices">
+      <div className={cn('grid gap-3', prompt ? 'mt-5' : 'mt-4')} role="group" aria-label="Choices">
         {options.map((opt) => {
           const youPicked = yourChoice === opt.id
           const theyPicked = revealed && theirChoice === opt.id
@@ -91,8 +102,9 @@ export function ActivityCard({
               onClick={() => onChoose?.(opt.id)}
               className={cn(
                 'group relative flex min-h-14 w-full items-center justify-between gap-3 rounded-[1.125rem] border-2 px-4 py-3 text-left font-display text-lg font-semibold',
-                'transition-[background-color,border-color,transform] duration-[var(--duration-base)] ease-[var(--ease-out)]',
+                'transition-[background-color,border-color,transform,opacity] duration-[var(--duration-base)] ease-[var(--ease-out)]',
                 'enabled:active:scale-[0.98] disabled:cursor-default',
+                revealed && 'slide-reveal',
                 youPicked &&
                   theyPicked &&
                   'border-glow bg-you text-you-ink shadow-[0_0_28px_-6px_var(--color-glow)]',
@@ -127,9 +139,16 @@ export function ActivityCard({
         })}
       </div>
 
-      <p className="mt-4 text-sm text-fg-muted" aria-live="polite">
-        {statusText}
-      </p>
+      <div className="mt-4 flex min-h-8 items-center justify-between gap-3">
+        <p className="text-sm text-fg-muted" aria-live="polite">
+          {statusText}
+        </p>
+        {revealed && onNext ? (
+          <Button variant="secondary" size="sm" loading={nextBusy} onClick={onNext}>
+            Another one
+          </Button>
+        ) : null}
+      </div>
     </section>
   )
 }

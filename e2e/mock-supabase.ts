@@ -30,11 +30,33 @@ export interface MockMessage {
   created_at: string
 }
 
+export interface MockRound {
+  id: string
+  space_id: string
+  kind: 'would_you_rather' | 'this_or_that' | 'question_of_the_day'
+  prompt_key: string
+  prompt: string
+  option_a: string | null
+  option_b: string | null
+  started_by: string
+  status: 'open' | 'revealed' | 'skipped'
+  answered_by: string[]
+  skipped_by: string | null
+  created_at: string
+}
+
+interface MockResponse {
+  round_id: string
+  user_id: string
+  choice: 'a' | 'b' | null
+  answer: string | null
+}
+
 /** One browser's live-updates connection and the channels it has joined. */
 interface LiveSocket {
   ws: WebSocketRoute
   uid: string | null
-  subs: Map<string, { joinRef: string; spaceId: string; bindingId: number }>
+  subs: Map<string, { joinRef: string; spaceId: string; bindings: Map<string, number> }>
 }
 
 interface MockInvite {
@@ -54,6 +76,8 @@ export class Backend {
   spaces = new Map<string, MockSpace>()
   invites: MockInvite[] = []
   messages: MockMessage[] = []
+  rounds: MockRound[] = []
+  responses: MockResponse[] = []
   sockets = new Set<LiveSocket>()
   /** When true, live updates are down (simulates a dropped websocket). */
   liveDown = false
@@ -71,11 +95,22 @@ export class Backend {
 
   /** Push a new message to every connected member of its space. */
   publish(m: MockMessage) {
+    this.broadcast('messages', 'INSERT', m)
+  }
+
+  /** Push a round change (new, answered, revealed, skipped) to the space's members. */
+  publishRound(r: MockRound, type: 'INSERT' | 'UPDATE') {
+    this.broadcast('activity_rounds', type, r)
+  }
+
+  private broadcast(table: string, type: string, m: { space_id: string; created_at: string }) {
     if (this.liveDown) return
     const space = this.spaces.get(m.space_id)
     for (const sock of this.sockets) {
       for (const [topic, sub] of sock.subs) {
         if (sub.spaceId !== m.space_id) continue
+        const bindingId = sub.bindings.get(table)
+        if (bindingId === undefined) continue
         if (!sock.uid || !space?.members.some((x) => x.user_id === sock.uid)) continue
         const columns = Object.keys(m).map((name) => ({ name, type: 'text' }))
         sock.ws.send(
@@ -85,12 +120,12 @@ export class Backend {
             topic,
             'postgres_changes',
             {
-              ids: [sub.bindingId],
+              ids: [bindingId],
               data: {
                 schema: 'public',
-                table: 'messages',
+                table,
                 commit_timestamp: m.created_at,
-                type: 'INSERT',
+                type,
                 record: m,
                 columns,
                 errors: null,
@@ -282,6 +317,78 @@ export class Backend {
         this.publish(m)
         return m
       }
+      case 'start_round': {
+        const space = this.spaces.get(args.p_space_id as string)
+        if (!uid || !space || !space.members.some((m) => m.user_id === uid))
+          return fail('not_member')
+        if (space.status !== 'active') fail('space_closed')
+        if (space.members.length < 2) fail('space_waiting')
+        const kind = args.p_kind as MockRound['kind']
+        const open = this.rounds.find(
+          (r) => r.space_id === space.id && r.kind === kind && r.status === 'open',
+        )
+        if (open) return open
+        if (kind === 'question_of_the_day') {
+          const today = this.rounds.find(
+            (r) =>
+              r.space_id === space.id &&
+              r.kind === kind &&
+              now - new Date(r.created_at).getTime() < 20 * 3600_000,
+          )
+          if (today) return today
+        }
+        const round: MockRound = {
+          id: this.newId(),
+          space_id: space.id,
+          kind,
+          prompt_key: args.p_prompt_key as string,
+          prompt: String(args.p_prompt).trim(),
+          option_a: kind === 'question_of_the_day' ? null : (args.p_option_a as string),
+          option_b: kind === 'question_of_the_day' ? null : (args.p_option_b as string),
+          started_by: uid,
+          status: 'open',
+          answered_by: [],
+          skipped_by: null,
+          created_at: this.nextTimestamp(),
+        }
+        this.rounds.push(round)
+        this.publishRound(round, 'INSERT')
+        return round
+      }
+      case 'answer_round': {
+        const round = this.rounds.find((r) => r.id === args.p_round_id)
+        const space = round && this.spaces.get(round.space_id)
+        if (!uid || !round || !space?.members.some((m) => m.user_id === uid))
+          return fail('not_member')
+        if (round.answered_by.includes(uid)) return round
+        if (round.status !== 'open') fail('round_closed')
+        if (space.status !== 'active') fail('space_closed')
+        if (round.kind === 'question_of_the_day') {
+          const text = String(args.p_answer ?? '').trim()
+          if (!text) fail('answer_empty')
+          if (text.length > 500) fail('answer_too_long')
+          this.responses.push({ round_id: round.id, user_id: uid, choice: null, answer: text })
+        } else {
+          const choice = args.p_choice as 'a' | 'b'
+          if (choice !== 'a' && choice !== 'b') fail('activity_invalid')
+          this.responses.push({ round_id: round.id, user_id: uid, choice, answer: null })
+        }
+        round.answered_by = [...round.answered_by, uid]
+        if (round.answered_by.length >= 2) round.status = 'revealed'
+        this.publishRound(round, 'UPDATE')
+        return round
+      }
+      case 'skip_round': {
+        const round = this.rounds.find((r) => r.id === args.p_round_id)
+        const space = round && this.spaces.get(round.space_id)
+        if (!uid || !round || !space?.members.some((m) => m.user_id === uid))
+          return fail('not_member')
+        if (round.status !== 'open') return round
+        round.status = 'skipped'
+        round.skipped_by = uid
+        this.publishRound(round, 'UPDATE')
+        return round
+      }
       case 'leave_space': {
         const space = this.spaces.get(args.p_space_id as string)
         if (!uid || !space || !space.members.some((m) => m.user_id === uid))
@@ -293,6 +400,9 @@ export class Backend {
           this.spaces.delete(space.id)
           this.invites = this.invites.filter((i) => i.space_id !== space.id)
           this.messages = this.messages.filter((m) => m.space_id !== space.id)
+          const gone = new Set(this.rounds.filter((r) => r.space_id === space.id).map((r) => r.id))
+          this.rounds = this.rounds.filter((r) => !gone.has(r.id))
+          this.responses = this.responses.filter((r) => !gone.has(r.round_id))
           return { deleted: true }
         }
         space.status = 'closed'
@@ -300,6 +410,22 @@ export class Backend {
       }
     }
     throw new Error(`mock: unknown rpc ${fn}`)
+  }
+
+  /** Rounds as the database would return them to this person (RLS applied to answers). */
+  roundRowsFor(uid: string, spaceId: string) {
+    const space = this.spaces.get(spaceId)
+    if (!space?.members.some((m) => m.user_id === uid)) return []
+    return this.rounds
+      .filter((r) => r.space_id === spaceId)
+      .sort((a, b) => b.created_at.localeCompare(a.created_at))
+      .slice(0, 100)
+      .map((r) => ({
+        ...r,
+        activity_responses: this.responses
+          .filter((x) => x.round_id === r.id && (x.user_id === uid || r.status === 'revealed'))
+          .map(({ user_id, choice, answer }) => ({ user_id, choice, answer })),
+      }))
   }
 
   spaceRowsFor(uid: string, onlyId?: string) {
@@ -477,6 +603,12 @@ export async function attachBackend(page: Page, backend: Backend): Promise<void>
       return json(route, 200, backend.messagesFor(uid, spaceId, before, limit))
     }
 
+    if (url.pathname === '/rest/v1/activity_rounds') {
+      if (!uid) return json(route, 401, { message: 'permission denied' })
+      const spaceId = url.searchParams.get('space_id')?.replace(/^eq\./, '') ?? ''
+      return json(route, 200, backend.roundRowsFor(uid, spaceId))
+    }
+
     if (url.pathname === '/rest/v1/spaces') {
       if (!uid) return json(route, 401, { message: 'permission denied' })
       const idFilter = url.searchParams.get('id')?.replace(/^eq\./, '')
@@ -522,11 +654,16 @@ async function routeRealtime(page: Page, backend: Backend) {
         }
         if (event === 'phx_join') {
           sock.uid = userFromAuthHeader(`Bearer ${String(payload.access_token ?? '')}`) ?? sock.uid
-          const config = (payload.config ?? {}) as { postgres_changes?: { filter?: string }[] }
+          const config = (payload.config ?? {}) as {
+            postgres_changes?: { filter?: string; table?: string }[]
+          }
           const changes = (config.postgres_changes ?? []).map((c) => ({ ...c, id: ++bindingSeq }))
           const first = changes[0]
           const spaceId = first?.filter?.replace(/^space_id=eq\./, '') ?? ''
-          if (first) sock.subs.set(topic, { joinRef: joinRef ?? '', spaceId, bindingId: first.id })
+          if (first) {
+            const bindings = new Map(changes.map((c) => [c.table ?? '', c.id]))
+            sock.subs.set(topic, { joinRef: joinRef ?? '', spaceId, bindings })
+          }
           return reply(joinRef, ref, topic, { postgres_changes: changes })
         }
         if (event === 'phx_leave') {

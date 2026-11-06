@@ -4,6 +4,15 @@ Newest first. Each entry: what, why, and what it rules out. Reversible decisions
 
 ## 2026-11-06
 
+**D-031 · How games work (stage 6).**
+
+- _Rounds in the chat._ Each play is a round (`activity_rounds`) shown as a card in the chat timeline at the time it started, so games and messages read as one shared history. Started from the ✦ Play button beside the message box (or "break the ice" in an empty chat).
+- _Hidden until both answer (D-006), enforced by the database._ Answers (`activity_responses`) are readable by their author, and by the other member only once the round is `revealed`. The second answer flips the round to revealed in the same locked transaction. Rounds stream live (Realtime); answers never do: the app refetches after a round changes, through the read policy.
+- _Rules (server-side):_ members of a space with two people only; one open round per game per space (starting again returns the open one); Question of the Day once per space per ~day (20 h); either person can skip an open round (a given answer stays hidden); a closed space keeps its history but takes no new rounds or answers; 60 rounds/hour flood limit; answering twice is a safe no-op.
+- _Prompts_ live in the app (`src/features/activities/prompts.ts`, 25 per game, owner's tone) with permanent keys; rounds store the key and the text shown. The next prompt is one the space hasn't played; after a full cycle it still avoids the most recent half.
+- _Your turn._ A gold strip above the message box appears when a game is waiting on you and its card isn't on screen; tapping it scrolls to the card. Reveals flip in; a shared pick glows once (both off under reduced motion).
+- Same resilience as chat: game updates ride the chat's live connection, and the reconnect catch-up and 5-second fallback also refresh games.
+
 **D-030 · Copy: "No small talk zone"; 18 conversation starters, three per space.** Owner found "Not the Hinge chat" and the original starters flat. Space-name placeholder is now "No small talk zone" (owner's choice). Empty chats show three starters from a pool of 18 (`src/features/chat/starters.ts`) in the owner's tone: playful, curious, a little cheeky, never explicit. The three are chosen from the space id, so both people see the same ones and they don't reshuffle on refresh; different spaces get different sets.
 
 **D-029 · Avatars beside messages; picker pictures load eagerly.** Owner asked (real-phone test, 2026-11-06) for each message to show its sender's small avatar, both sides. It sits beside the last bubble of each run (like iMessage/Messenger), so a burst of messages shows one picture, not one per bubble; people without an avatar show their initial. The picker's images were `loading="lazy"`, which iOS Safari can leave blank inside the animating, scrolling sheet until reopened; they now load eagerly, are preloaded in the background on home and the name step (~40 KB, once), are SVGO-optimised, and are cached for 7 days.

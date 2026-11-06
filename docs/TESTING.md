@@ -19,6 +19,11 @@ Viewports: iPhone SE (375×667), Pixel 7 (412×915), tablet 768×1024, desktop 1
 | Accessibility | axe via Playwright                 | WCAG 2.1 AA; serious or critical violations fail the build                            |
 | Performance   | Lighthouse (from stage 7)          | Mobile perf ≥ 90, a11y ≥ 95 targets                                                   |
 
+## Verified — 2026-11-06 (stage 6: games, branch `activities`)
+
+- `npm run check`: **144 tests**, incl. 18 new database tests for games (start rules, one open per game, Question of the Day once a day, validation; the first answer visible only to its author; the second reveals both to both; skip keeps an answer hidden; outsiders and signed-out users see and do nothing; no direct writes; closed spaces; deletion with the space; rounds published, answers not), prompt-list checks (unique keys, lengths, no repeats until a full cycle) and timeline placement of game cards.
+- Playwright: **83 pass** (45 skipped by design). New journeys in `e2e/games.spec.ts`, two browsers each: This or That hidden → reveal for both → "Another one" with a different prompt → survives refresh; Question of the Day written answers unlock together and only once a day; skip seen by both; the "your turn" strip appears when the card scrolls away and jumps back to it; a reveal still arrives with the live connection down; no games after the other person leaves. Accessibility checked on the Play sheet and both card types.
+
 ## Verified — 2026-11-06 (avatars)
 
 - `npm run check`: **118 tests**, incl. new database tests for avatars (only the 12 keys or null allowed; only your own row; the other member and the invite preview see it; outsiders don't).

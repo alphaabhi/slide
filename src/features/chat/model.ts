@@ -74,6 +74,17 @@ export function mergeMessages(
 export type ChatRow =
   | { kind: 'day'; key: string; label: string }
   | { kind: 'message'; key: string; message: ChatMessage; isLastInRun: boolean }
+  | { kind: 'extra'; key: string; id: string }
+
+/** Something other than a message that sits in the timeline (e.g. a game card). */
+export interface TimelineExtra {
+  id: string
+  createdAt: string
+  /** Started by me: the list scrolls to it like my own message. */
+  mine?: boolean
+  /** Changes when its content changes size (e.g. answered, revealed). */
+  version?: string
+}
 
 const RUN_GAP_MS = 5 * 60 * 1000
 
@@ -98,23 +109,51 @@ export function dayLabel(date: Date, now = new Date()): string {
 /**
  * Adds day separators and marks the last bubble of each run (same sender,
  * same day, under 5 minutes apart) — that one gets the tail and the time.
+ * Extras (game cards) are placed by time among confirmed messages and break runs.
+ * Unconfirmed messages always stay at the very end, where they were typed.
  */
-export function toRows(messages: ChatMessage[], now = new Date()): ChatRow[] {
+export function toRows(
+  messages: ChatMessage[],
+  now = new Date(),
+  extras: TimelineExtra[] = [],
+): ChatRow[] {
+  type Item = { t: 'm'; m: ChatMessage } | { t: 'x'; x: TimelineExtra }
+  const confirmed = messages.filter((m) => m.status !== 'sending' && m.status !== 'failed')
+  const pending = messages.filter((m) => m.status === 'sending' || m.status === 'failed')
+  const sortedExtras = [...extras].sort((a, b) => a.createdAt.localeCompare(b.createdAt))
+  const items: Item[] = []
+  let xi = 0
+  for (const m of confirmed) {
+    while (xi < sortedExtras.length && sortedExtras[xi]!.createdAt <= m.createdAt) {
+      items.push({ t: 'x', x: sortedExtras[xi++]! })
+    }
+    items.push({ t: 'm', m })
+  }
+  while (xi < sortedExtras.length) items.push({ t: 'x', x: sortedExtras[xi++]! })
+  for (const m of pending) items.push({ t: 'm', m })
+
   const rows: ChatRow[] = []
   let lastDay = ''
-  messages.forEach((m, i) => {
-    const d = new Date(m.createdAt)
+  items.forEach((item, i) => {
+    const created = item.t === 'm' ? item.m.createdAt : item.x.createdAt
+    const d = new Date(created)
     const k = dayKey(d)
     if (k !== lastDay) {
       rows.push({ kind: 'day', key: `day-${k}`, label: dayLabel(d, now) })
       lastDay = k
     }
-    const next = messages[i + 1]
+    if (item.t === 'x') {
+      rows.push({ kind: 'extra', key: `x-${item.x.id}`, id: item.x.id })
+      return
+    }
+    const m = item.m
+    const next = items[i + 1]
+    const nextMsg = next?.t === 'm' ? next.m : undefined
     const isLastInRun =
-      !next ||
-      next.mine !== m.mine ||
-      dayKey(new Date(next.createdAt)) !== k ||
-      new Date(next.createdAt).getTime() - d.getTime() > RUN_GAP_MS ||
+      !nextMsg ||
+      nextMsg.mine !== m.mine ||
+      dayKey(new Date(nextMsg.createdAt)) !== k ||
+      new Date(nextMsg.createdAt).getTime() - d.getTime() > RUN_GAP_MS ||
       m.status === 'failed'
     rows.push({ kind: 'message', key: m.key, message: m, isLastInRun })
   })
