@@ -129,7 +129,7 @@ function ValidInvite({
       description="SLIDE is a private space for exactly two people: just the two of you, with chat and a few games to play together."
     >
       <div className="slide-pop mb-6 flex items-center gap-3 rounded-card border border-line surface-panel px-4 py-3">
-        <Avatar name={inviter} side="them" />
+        <Avatar name={inviter} avatar={preview.inviter_avatar} side="them" />
         <div className="min-w-0">
           <p className="truncate font-display font-semibold">
             {preview.space_title ?? `${inviter}’s space`}

@@ -67,11 +67,14 @@ Index `(space_id, created_at desc, id desc)` for history pages; `(sender_id, cre
 
 **Live updates:** the table is in the `supabase_realtime` publication. Supabase Realtime applies the read policy to each subscriber, so only the two members receive new messages.
 
+### Avatars — `20261108000000_avatars.sql`
+
+`profiles.avatar`: optional text, one of the 12 picker keys (`kai`, `rin`, `haru`, `sora`, `mika`, `jin`, `yuna`, `ren`, `aiko`, `taro`, `nori`, `emi`) or null for "just my initial", enforced by a check constraint. Users can set it only on their own row (column grants + existing RLS). The other member of a space sees it with the name; `get_invitation` also returns `inviter_avatar` so the invite page can show it. The pictures themselves are static files in `public/avatars/` (no storage bucket, nothing uploaded by users).
+
 ## Planned
 
 | Table                                     | Stage |
 | ----------------------------------------- | ----- |
-| `messages`                                | 4     |
 | `activity_sessions`, `activity_responses` | 6     |
 
 ## Policy principles

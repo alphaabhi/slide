@@ -19,6 +19,11 @@ Viewports: iPhone SE (375×667), Pixel 7 (412×915), tablet 768×1024, desktop 1
 | Accessibility | axe via Playwright                 | WCAG 2.1 AA; serious or critical violations fail the build                            |
 | Performance   | Lighthouse (from stage 7)          | Mobile perf ≥ 90, a11y ≥ 95 targets                                                   |
 
+## Verified — 2026-11-06 (avatars)
+
+- `npm run check`: **118 tests**, incl. new database tests for avatars (only the 12 keys or null allowed; only your own row; the other member and the invite preview see it; outsiders don't).
+- Playwright: **79 pass** (33 skipped by design). New journey `e2e/avatars.spec.ts`: pick an avatar at sign-up → shown on home → invite page and chat show it to the other person → the character name appears nowhere outside the picker → change it from Edit profile and the other person sees the new one → back to "My initial". Accessibility checked on the picker and the Edit profile sheet.
+
 ## Verified — 2026-11-06 (stage 4: chat)
 
 - `npm run check`: **113 tests** — 14 new database tests for messages (members send/read in order; server time; trimming, empty, 4,000-char limit, control characters; retry with the same id returns the original; ids can't be hijacked; outsiders and signed-out users blocked; spaces isolated; no direct insert/edit/delete or impersonation; flood limit; leaving keeps history for the other person but stops sending; last leaver deletes; published for Realtime) and 6 for chat logic (merge/de-dupe/order, day separators and runs, Enter rules incl. IME).

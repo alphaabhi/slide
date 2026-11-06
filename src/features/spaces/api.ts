@@ -6,7 +6,7 @@ import { getSupabase } from '@/lib/supabase'
 interface MemberRow {
   user_id: string
   joined_at: string
-  profiles: { display_name: string } | null
+  profiles: { display_name: string; avatar: string | null } | null
 }
 
 interface InvitationRow {
@@ -33,20 +33,26 @@ export interface Space {
   phase: SpacePhase
   createdAt: string
   iCreatedIt: boolean
-  partner: { id: string; name: string } | null
+  partner: { id: string; name: string; avatar: string | null } | null
   /** The invite that can still be used, if any (waiting spaces only). */
   openInvite: { expiresAt: string } | null
 }
 
 export type InvitePreview =
-  | { status: 'valid'; inviter_name: string | null; space_title: string | null; expires_at: string }
+  | {
+      status: 'valid'
+      inviter_name: string | null
+      inviter_avatar: string | null
+      space_title: string | null
+      expires_at: string
+    }
   | { status: 'own' | 'member'; space_id: string }
   | { status: 'not_found' | 'expired' | 'revoked' | 'used' | 'full' | 'closed' }
 
 /* --------------------------------------------------------------- mapping */
 
 const SPACE_COLUMNS =
-  'id, title, status, created_at, created_by, space_members(user_id, joined_at, profiles(display_name)), invitations(expires_at, revoked_at, accepted_at)'
+  'id, title, status, created_at, created_by, space_members(user_id, joined_at, profiles(display_name, avatar)), invitations(expires_at, revoked_at, accepted_at)'
 
 export function toSpace(row: SpaceRow, myId: string): Space {
   const partnerRow = row.space_members.find((m) => m.user_id !== myId)
@@ -63,7 +69,11 @@ export function toSpace(row: SpaceRow, myId: string): Space {
     createdAt: row.created_at,
     iCreatedIt: row.created_by === myId,
     partner: partnerRow
-      ? { id: partnerRow.user_id, name: partnerRow.profiles?.display_name ?? 'Someone' }
+      ? {
+          id: partnerRow.user_id,
+          name: partnerRow.profiles?.display_name ?? 'Someone',
+          avatar: partnerRow.profiles?.avatar ?? null,
+        }
       : null,
     openInvite: phase === 'waiting' && open ? { expiresAt: open.expires_at } : null,
   }

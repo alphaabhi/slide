@@ -33,7 +33,9 @@ interface NavState {
 function SpacePage() {
   const { spaceId = '' } = useParams()
   const session = useSession()
-  const myName = useMyProfile(session.user.id).data?.display_name ?? 'You'
+  const me = useMyProfile(session.user.id).data
+  const myName = me?.display_name ?? 'You'
+  const myAvatar = me?.avatar ?? null
   const location = useLocation()
   const navigate = useNavigate()
   const toast = useToast()
@@ -109,7 +111,7 @@ function SpacePage() {
     return <ChatScreen space={s} userId={session.user.id} justJoined={flags.justJoined} />
   }
   return (
-    <Shell space={s} myName={myName}>
+    <Shell space={s} myName={myName} myAvatar={myAvatar}>
       {flags.justJoined ? (
         <WelcomeBanner text={`You’re in. Say hi to ${s.partner?.name ?? 'them'} 👋`} />
       ) : null}
@@ -142,10 +144,12 @@ function SpacePage() {
 function Shell({
   space,
   myName,
+  myAvatar,
   children,
 }: {
   space?: Space
   myName?: string
+  myAvatar?: string | null
   children: React.ReactNode
 }) {
   return (
@@ -163,6 +167,7 @@ function Shell({
             <div className="flex -space-x-2" aria-hidden="true">
               <Avatar
                 name={myName ?? 'You'}
+                avatar={myAvatar}
                 side="you"
                 size="sm"
                 className="ring-2 ring-[var(--color-canvas)]"
@@ -170,6 +175,7 @@ function Shell({
               {space.partner ? (
                 <Avatar
                   name={space.partner.name}
+                  avatar={space.partner.avatar}
                   side="them"
                   size="sm"
                   className="ring-2 ring-[var(--color-canvas)]"
