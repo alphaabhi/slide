@@ -66,6 +66,11 @@ test('this or that: picks stay hidden until both choose, then reveal for both', 
   const prompts = backend.rounds.map((r) => r.prompt_key)
   expect(new Set(prompts).size).toBe(2)
 
+  // An untitled space is named "You & Meera" once, not twice.
+  await expect(abhi.getByRole('heading', { name: 'You & Meera' })).toBeVisible()
+  await expect(abhi.getByText('Private · just the two of you')).toBeVisible()
+  await expect(abhi.getByText('You & Meera', { exact: true })).toHaveCount(1)
+
   // History survives a refresh, still revealed.
   await meera.reload()
   await expect(

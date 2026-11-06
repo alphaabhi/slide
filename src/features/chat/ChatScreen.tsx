@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router'
 import { Avatar } from '@/components/ui/Avatar'
 import { Dialog } from '@/components/ui/Dialog'
@@ -52,6 +52,15 @@ export function ChatScreen({
   )
   const loadOlder = useCallback(() => void history.fetchNextPage(), [history])
   const closed = space.phase === 'closed'
+
+  // "You're in" greets you for a few seconds, then gets out of the way.
+  // (An empty chat already says "Say hi", so it only shows when there's history.)
+  const [showWelcome, setShowWelcome] = useState(!!justJoined)
+  useEffect(() => {
+    if (!showWelcome) return
+    const t = window.setTimeout(() => setShowWelcome(false), 4000)
+    return () => window.clearTimeout(t)
+  }, [showWelcome])
 
   // Games sit in the timeline next to the messages from the same time.
   const roundsQuery = useRounds(space.id)
@@ -139,7 +148,7 @@ export function ChatScreen({
           </div>
           <div className="min-w-0 flex-1">
             <h1 className="truncate font-display text-base font-semibold">{spaceLabel(space)}</h1>
-            <ConnectionLine closed={closed} partnerName={partnerName} />
+            <ConnectionLine closed={closed} partnerName={partnerName} titled={!!space.title} />
           </div>
           <Dialog
             title="Space options"
@@ -159,8 +168,11 @@ export function ChatScreen({
       </header>
       {closed ? null : <ConnectionBanner status={live} />}
 
-      {justJoined ? (
-        <p className="slide-pop mx-gutter mt-3 rounded-card border border-line surface-panel px-4 py-3 text-center font-display font-semibold">
+      {showWelcome && messages.length > 0 ? (
+        <p
+          role="status"
+          className="slide-pop mx-gutter mt-3 rounded-card border border-line surface-panel px-4 py-3 text-center font-display font-semibold"
+        >
           You’re in. Say hi to {partnerName} 👋
         </p>
       ) : null}
@@ -233,10 +245,20 @@ export function ChatScreen({
   )
 }
 
-function ConnectionLine({ closed, partnerName }: { closed: boolean; partnerName: string }) {
-  return (
-    <p className="truncate text-xs text-fg-muted">{closed ? 'Closed' : `You & ${partnerName}`}</p>
-  )
+/** Under the title. An untitled space is already called "You & …", so don't repeat it. */
+function ConnectionLine({
+  closed,
+  partnerName,
+  titled,
+}: {
+  closed: boolean
+  partnerName: string
+  titled: boolean
+}) {
+  let text = 'Private · just the two of you'
+  if (closed) text = 'Closed'
+  else if (titled) text = `You & ${partnerName}`
+  return <p className="truncate text-xs text-fg-muted">{text}</p>
 }
 
 /** A full-width strip under the header, only when messages can't flow right now. */

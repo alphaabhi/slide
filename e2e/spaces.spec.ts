@@ -80,7 +80,11 @@ test('two people: create → invite → join → both inside → outsider reject
   await meera.getByRole('button', { name: 'Join Abhi' }).click()
   // Joined: straight into the chat with Abhi
   await expect(meera.getByRole('textbox', { name: 'Message Abhi' })).toBeVisible()
-  await expect(meera.getByText('You’re in. Say hi to Abhi')).toBeVisible()
+  // An empty chat greets you itself (no extra pinned banner).
+  await expect(meera.getByRole('heading', { name: 'Say hi to Abhi' })).toBeVisible()
+  await expect(meera.getByText('You’re in. Say hi to Abhi')).toHaveCount(0)
+  // Titled space: the line under the title says who's in it.
+  await expect(meera.getByText('You & Abhi', { exact: true })).toBeVisible()
   await expectNoSeriousA11y(meera)
 
   // Abhi's waiting screen notices without a refresh
