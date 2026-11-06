@@ -57,9 +57,44 @@ describe('toRows', () => {
     const rows = toRows(list, now)
     expect(
       rows.map((r) =>
-        r.kind === 'day' ? r.label : `${r.message.body}${r.isLastInRun ? '*' : ''}`,
+        r.kind === 'day'
+          ? r.label
+          : r.kind === 'extra'
+            ? `[${r.id}]`
+            : `${r.message.body}${r.isLastInRun ? '*' : ''}`,
       ),
     ).toEqual(['Yesterday', 'm1*', 'Today', 'm2', 'm3*', 'm4*'])
+  })
+
+  it('places game cards by time; a card breaks a run; unsent messages stay last', () => {
+    const list = mergeMessages(
+      [
+        msg(1, ME, new Date('2026-11-06T10:00:00').toISOString()),
+        msg(2, ME, new Date('2026-11-06T10:01:00').toISOString()),
+      ],
+      [
+        {
+          clientId: 'local',
+          body: 'typing…',
+          createdAt: '2026-11-06T09:00:00.000Z',
+          status: 'sending',
+        },
+      ],
+      ME,
+    )
+    const rows = toRows(list, now, [
+      { id: 'g1', createdAt: new Date('2026-11-06T10:00:30').toISOString() },
+      { id: 'g2', createdAt: new Date('2026-11-06T11:00:00').toISOString() },
+    ])
+    expect(
+      rows.map((r) =>
+        r.kind === 'day'
+          ? r.label
+          : r.kind === 'extra'
+            ? `[${r.id}]`
+            : `${r.message.body}${r.isLastInRun ? '*' : ''}`,
+      ),
+    ).toEqual(['Today', 'm1*', '[g1]', 'm2*', '[g2]', 'typing…*'])
   })
 })
 

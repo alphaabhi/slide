@@ -71,11 +71,24 @@ Index `(space_id, created_at desc, id desc)` for history pages; `(sender_id, cre
 
 `profiles.avatar`: optional text, one of the 12 picker keys (`kai`, `rin`, `haru`, `sora`, `mika`, `jin`, `yuna`, `ren`, `aiko`, `taro`, `nori`, `emi`) or null for "just my initial", enforced by a check constraint. Users can set it only on their own row (column grants + existing RLS). The other member of a space sees it with the name; `get_invitation` also returns `inviter_avatar` so the invite page can show it. The pictures themselves are static files in `public/avatars/` (no storage bucket, nothing uploaded by users).
 
+### Activities (stage 6) — `20261109000000_activities.sql`
+
+`activity_rounds`: `space_id`, `kind` (`would_you_rather` / `this_or_that` / `question_of_the_day`), `prompt_key`, `prompt`, `option_a`/`option_b` (choice games only), `started_by`, `status` (`open` → `revealed` or `skipped`), `answered_by` (who, never what), `skipped_by`, timestamps. One open round per game per space (partial unique index).
+
+`activity_responses`: `round_id`, `user_id`, `choice` (`a`/`b`) or `answer` (1–500 characters, no control characters); one per person per round.
+
+| Function                                      | Who                   | Does                                                                                                       |
+| --------------------------------------------- | --------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `start_round(space, kind, key, prompt, a, b)` | members, both present | New round; returns the open one if that game is already open, or today's Question of the Day. 60/hour.     |
+| `answer_round(round, choice, answer)`         | members               | Saves your answer; the second answer reveals the round atomically. Retrying is a no-op. Refused if closed. |
+| `skip_round(round)`                           | members               | Marks an open round skipped; any answer already given stays hidden.                                        |
+
+**Access:** members read their space's rounds; answers are readable by their author, and by the other member only after the reveal. No direct writes. Rounds are in the `supabase_realtime` publication; answers are not.
+
 ## Planned
 
-| Table                                     | Stage |
-| ----------------------------------------- | ----- |
-| `activity_sessions`, `activity_responses` | 6     |
+| Table | Stage |
+| ----- | ----- |
 
 ## Policy principles
 

@@ -1,8 +1,12 @@
-import { useCallback, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router'
 import { Avatar } from '@/components/ui/Avatar'
 import { Dialog } from '@/components/ui/Dialog'
 import { Icon } from '@/components/ui/Icon'
+import { useRounds, type Round } from '@/features/activities/api'
+import { PlaySheet, RoundCard, YourTurn } from '@/features/activities/Games'
+import { scrollToRound, useStartGame } from '@/features/activities/useStartGame'
+import type { GameKind } from '@/features/activities/prompts'
 import { useMyProfile } from '@/features/profile/api'
 import { spaceLabel, type Space } from '@/features/spaces/api'
 import { LeaveSpace } from '@/features/spaces/LeaveSpace'
@@ -10,7 +14,7 @@ import { cn } from '@/lib/cn'
 import { useLiveMessages, useMessageHistory, useOutbox, type LiveStatus } from './api'
 import { Composer, type ComposerHandle } from './Composer'
 import { MessageList } from './MessageList'
-import { mergeMessages, type Message } from './model'
+import { mergeMessages, type Message, type TimelineExtra } from './model'
 import { pickStarters } from './starters'
 import { useViewportFit } from './useViewportFit'
 
@@ -48,6 +52,63 @@ export function ChatScreen({
   )
   const loadOlder = useCallback(() => void history.fetchNextPage(), [history])
   const closed = space.phase === 'closed'
+
+  // "You're in" greets you for a few seconds, then gets out of the way.
+  // (An empty chat already says "Say hi", so it only shows when there's history.)
+  const [showWelcome, setShowWelcome] = useState(!!justJoined)
+  useEffect(() => {
+    if (!showWelcome) return
+    const t = window.setTimeout(() => setShowWelcome(false), 4000)
+    return () => window.clearTimeout(t)
+  }, [showWelcome])
+
+  // Games sit in the timeline next to the messages from the same time.
+  const roundsQuery = useRounds(space.id)
+  const rounds = useMemo(() => roundsQuery.data ?? [], [roundsQuery.data])
+  const oldestLoaded = history.hasNextPage ? server[server.length - 1]?.created_at : undefined
+  const shownRounds = useMemo(
+    () => (oldestLoaded ? rounds.filter((r) => r.created_at >= oldestLoaded) : rounds),
+    [rounds, oldestLoaded],
+  )
+  const extras = useMemo<TimelineExtra[]>(
+    () =>
+      shownRounds.map((r) => ({
+        id: r.id,
+        createdAt: r.created_at,
+        mine: r.started_by === userId,
+        version: `${r.status}:${r.answered_by.length}:${r.activity_responses.length}`,
+      })),
+    [shownRounds, userId],
+  )
+  const roundById = useMemo(() => new Map(rounds.map((r) => [r.id, r])), [rounds])
+  const { startGame, starting } = useStartGame(space.id, rounds)
+  const play = useCallback(
+    async (kind: GameKind) => {
+      const id = await startGame(kind)
+      if (id) window.setTimeout(() => scrollToRound(id), 150)
+      return id !== null
+    },
+    [startGame],
+  )
+  const renderRound = useCallback(
+    (id: string) => {
+      const round: Round | undefined = roundById.get(id)
+      if (!round) return null
+      return (
+        <RoundCard
+          round={round}
+          spaceId={space.id}
+          myId={userId}
+          myName={myName}
+          partnerName={partnerName}
+          closed={closed}
+          onNext={(kind) => void play(kind)}
+          nextBusy={starting === round.kind}
+        />
+      )
+    },
+    [roundById, space.id, userId, myName, partnerName, closed, play, starting],
+  )
   const myAvatar = me?.avatar ?? null
   const meAuthor = useMemo(() => ({ name: myName, avatar: myAvatar }), [myName, myAvatar])
   const theirAvatar = space.partner?.avatar ?? null
@@ -87,7 +148,7 @@ export function ChatScreen({
           </div>
           <div className="min-w-0 flex-1">
             <h1 className="truncate font-display text-base font-semibold">{spaceLabel(space)}</h1>
-            <ConnectionLine closed={closed} partnerName={partnerName} />
+            <ConnectionLine closed={closed} partnerName={partnerName} titled={!!space.title} />
           </div>
           <Dialog
             title="Space options"
@@ -107,8 +168,11 @@ export function ChatScreen({
       </header>
       {closed ? null : <ConnectionBanner status={live} />}
 
-      {justJoined ? (
-        <p className="slide-pop mx-gutter mt-3 rounded-card border border-line surface-panel px-4 py-3 text-center font-display font-semibold">
+      {showWelcome && messages.length > 0 ? (
+        <p
+          role="status"
+          className="slide-pop mx-gutter mt-3 rounded-card border border-line surface-panel px-4 py-3 text-center font-display font-semibold"
+        >
           You’re in. Say hi to {partnerName} 👋
         </p>
       ) : null}
@@ -140,12 +204,16 @@ export function ChatScreen({
           onRetry={outbox.retry}
           me={meAuthor}
           them={themAuthor}
+          extras={extras}
+          renderExtra={renderRound}
           empty={
             <EmptyChat
               partnerName={partnerName}
               closed={closed}
               spaceId={space.id}
               onPick={(t) => composer.current?.insert(t)}
+              onPlay={() => void play('this_or_that')}
+              playing={starting !== null}
             />
           }
         />
@@ -157,12 +225,16 @@ export function ChatScreen({
           no new messages can be sent.
         </p>
       ) : (
-        <Composer
-          spaceId={space.id}
-          partnerName={partnerName}
-          onSend={outbox.send}
-          onReady={(h) => (composer.current = h)}
-        />
+        <>
+          <YourTurn rounds={shownRounds} myId={userId} partnerName={partnerName} />
+          <Composer
+            spaceId={space.id}
+            partnerName={partnerName}
+            onSend={outbox.send}
+            onReady={(h) => (composer.current = h)}
+            leading={<PlaySheet rounds={rounds} myId={userId} starting={starting} onPlay={play} />}
+          />
+        </>
       )}
 
       {/* Announces only new incoming messages to screen readers, not the whole history. */}
@@ -173,10 +245,20 @@ export function ChatScreen({
   )
 }
 
-function ConnectionLine({ closed, partnerName }: { closed: boolean; partnerName: string }) {
-  return (
-    <p className="truncate text-xs text-fg-muted">{closed ? 'Closed' : `You & ${partnerName}`}</p>
-  )
+/** Under the title. An untitled space is already called "You & …", so don't repeat it. */
+function ConnectionLine({
+  closed,
+  partnerName,
+  titled,
+}: {
+  closed: boolean
+  partnerName: string
+  titled: boolean
+}) {
+  let text = 'Private · just the two of you'
+  if (closed) text = 'Closed'
+  else if (titled) text = `You & ${partnerName}`
+  return <p className="truncate text-xs text-fg-muted">{text}</p>
 }
 
 /** A full-width strip under the header, only when messages can't flow right now. */
@@ -209,10 +291,14 @@ function EmptyChat({
   closed,
   spaceId,
   onPick,
+  onPlay,
+  playing,
 }: {
   partnerName: string
   closed: boolean
   spaceId: string
+  onPlay: () => void
+  playing: boolean
   onPick: (t: string) => void
 }) {
   const starters = useMemo(() => pickStarters(spaceId), [spaceId])
@@ -248,6 +334,15 @@ function EmptyChat({
               </li>
             ))}
           </ul>
+          <button
+            type="button"
+            onClick={onPlay}
+            disabled={playing}
+            className="mt-4 inline-flex items-center gap-2 rounded-pill px-4 py-2 font-display text-sm font-semibold text-gold hover:bg-surface-high disabled:opacity-60"
+          >
+            <Icon name="sparkle" size={16} />
+            Or break the ice with a quick game
+          </button>
         </>
       )}
     </div>

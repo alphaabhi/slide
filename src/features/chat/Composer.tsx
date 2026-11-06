@@ -27,11 +27,14 @@ export function Composer({
   partnerName,
   onSend,
   onReady,
+  leading,
 }: {
   spaceId: string
   partnerName: string
   onSend: (body: string) => void
   onReady?: (handle: ComposerHandle) => void
+  /** Shown before the text box, e.g. the Play button. */
+  leading?: React.ReactNode
 }) {
   const [value, setValue] = useState(() => loadDraft(spaceId))
   const ref = useRef<HTMLTextAreaElement>(null)
@@ -81,6 +84,7 @@ export function Composer({
       onSubmit={submit}
       className="flex items-end gap-2 border-t border-line bg-canvas/95 px-gutter pt-2 pb-safe backdrop-blur"
     >
+      {leading}
       <div className="min-w-0 flex-1">
         <label htmlFor={`composer-${spaceId}`} className="sr-only">
           Message {partnerName}

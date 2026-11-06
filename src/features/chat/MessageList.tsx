@@ -2,9 +2,10 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { Icon } from '@/components/ui/Icon'
 import { MessageBubble } from '@/components/ui/MessageBubble'
 import { Spinner } from '@/components/ui/Spinner'
-import { formatTime, toRows, type ChatMessage } from './model'
+import { formatTime, toRows, type ChatMessage, type TimelineExtra } from './model'
 
 const NEAR_BOTTOM_PX = 120
+const NO_EXTRAS: TimelineExtra[] = []
 
 /**
  * Scrollable history. Opens at the newest message; loads older pages when you
@@ -20,6 +21,8 @@ export function MessageList({
   empty,
   me,
   them,
+  extras = NO_EXTRAS,
+  renderExtra,
 }: {
   messages: ChatMessage[]
   hasOlder: boolean
@@ -30,16 +33,26 @@ export function MessageList({
   /** Shown beside your messages and theirs. Pass stable objects (memoised). */
   me?: { name: string; avatar?: string | null }
   them?: { name: string; avatar?: string | null }
+  /** Game cards and the like, placed by time among the messages. */
+  extras?: TimelineExtra[]
+  renderExtra?: (id: string) => React.ReactNode
 }) {
   const scroller = useRef<HTMLDivElement>(null)
   const topSentinel = useRef<HTMLDivElement>(null)
   const atBottom = useRef(true)
   const prepending = useRef<{ height: number; top: number } | null>(null)
   const [unseen, setUnseen] = useState(0)
-  const rows = useMemo(() => toRows(messages), [messages])
+  const rows = useMemo(() => toRows(messages, undefined, extras), [messages, extras])
 
-  const last = messages[messages.length - 1]
-  const lastKey = last?.key
+  const lastRow = rows[rows.length - 1]
+  const lastKey = lastRow?.key
+  const lastMine =
+    lastRow?.kind === 'message'
+      ? lastRow.message.mine
+      : lastRow?.kind === 'extra'
+        ? !!extras.find((x) => x.id === lastRow.id)?.mine
+        : false
+  const extrasVersion = extras.map((x) => `${x.id}:${x.version ?? ''}`).join('|')
   const firstKey = messages[0]?.key
 
   const scrollToBottom = (smooth = false) => {
@@ -61,11 +74,17 @@ export function MessageList({
 
   // A new message at the bottom: follow it if appropriate.
   useLayoutEffect(() => {
-    if (!last) return
-    if (atBottom.current || last.mine) scrollToBottom()
+    if (!lastRow) return
+    if (atBottom.current || lastMine) scrollToBottom()
     else setUnseen((n) => n + 1)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lastKey])
+
+  // A card changed size (answered, revealed): stay pinned to the bottom if we were there.
+  useLayoutEffect(() => {
+    if (atBottom.current) scrollToBottom()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [extrasVersion])
 
   // Load older messages when the top comes into view.
   useEffect(() => {
@@ -103,12 +122,16 @@ export function MessageList({
             <Spinner label="Loading earlier messages" />
           </div>
         ) : null}
-        {messages.length === 0 ? (
+        {rows.length === 0 ? (
           empty
         ) : (
           <ol aria-label="Messages" className="mx-auto max-w-[var(--composer-max)]">
             {rows.map((row) =>
-              row.kind === 'day' ? (
+              row.kind === 'extra' ? (
+                <li key={row.key} id={`round-${row.id}`} className="my-4 scroll-mt-4">
+                  {renderExtra?.(row.id)}
+                </li>
+              ) : row.kind === 'day' ? (
                 <li key={row.key} className="my-4 flex justify-center">
                   <span className="label-meta rounded-pill border border-line px-3 py-1 text-fg-muted">
                     {row.label}

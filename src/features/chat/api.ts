@@ -6,6 +6,7 @@ import {
 } from '@tanstack/react-query'
 import type { RealtimeChannel } from '@supabase/supabase-js'
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react'
+import { refreshRounds } from '@/features/activities/api'
 import { getSupabase } from '@/lib/supabase'
 import type { Message, OutboxItem } from './model'
 
@@ -57,6 +58,8 @@ export function addToCache(qc: QueryClient, spaceId: string, incoming: Message[]
 
 /** Fetch the newest page and merge it in: catches anything missed while disconnected. */
 export async function catchUp(qc: QueryClient, spaceId: string) {
+  // Games share the connection, so they catch up too.
+  void refreshRounds(qc, spaceId)
   addToCache(qc, spaceId, await fetchPage(spaceId, null))
 }
 
@@ -125,6 +128,17 @@ export function useLiveMessages(spaceId: string, onIncoming: (m: Message) => voi
           addToCache(qc, spaceId, [m])
           onIncomingRef.current(m)
         },
+      )
+      // A game started, answered, revealed or skipped: refetch (answers are never streamed).
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'activity_rounds',
+          filter: `space_id=eq.${spaceId}`,
+        },
+        () => void refreshRounds(qc, spaceId),
       )
       .subscribe((s) => {
         if (s === 'SUBSCRIBED') {
