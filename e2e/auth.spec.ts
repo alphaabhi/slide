@@ -102,16 +102,16 @@ test('resend is disabled during the cooldown', async ({ page }) => {
   await expect(page.getByLabel('Email')).toBeVisible()
 })
 
-test('rename from home', async ({ page }) => {
+test('rename from home (avatar untouched)', async ({ page }) => {
   await mockSupabase(page)
   await page.goto('/sign-in')
   await signIn(page)
   await page.getByLabel('Display name').fill('Abhi')
   await page.getByRole('button', { name: 'Continue' }).click()
   await page.getByRole('button', { name: 'Edit' }).click()
-  const dialog = page.getByRole('dialog', { name: 'Change your name' })
+  const dialog = page.getByRole('dialog', { name: 'Edit profile' })
   await dialog.getByLabel('Display name').fill('Abhinav')
-  await dialog.getByRole('button', { name: 'Save name' }).click()
+  await dialog.getByRole('button', { name: 'Save', exact: true }).click()
   await expect(page.getByRole('heading', { name: 'Hi, Abhinav' })).toBeVisible()
   await expect(dialog).toBeHidden()
 })

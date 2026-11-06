@@ -49,6 +49,8 @@ interface MockInvite {
 export class Backend {
   usersByEmail = new Map<string, string>()
   profiles = new Map<string, string>()
+  /** Chosen avatar keys, by user id (absent = just the initial). */
+  avatars = new Map<string, string | null>()
   spaces = new Map<string, MockSpace>()
   invites: MockInvite[] = []
   messages: MockMessage[] = []
@@ -207,6 +209,7 @@ export class Backend {
         return {
           status: 'valid',
           inviter_name: this.profiles.get(inv.created_by) ?? null,
+          inviter_avatar: this.avatars.get(inv.created_by) ?? null,
           space_title: space.title,
           expires_at: inv.expires_at,
         }
@@ -312,7 +315,10 @@ export class Backend {
         space_members: s.members.map((m) => ({
           user_id: m.user_id,
           joined_at: m.joined_at,
-          profiles: { display_name: this.profiles.get(m.user_id) ?? 'Someone' },
+          profiles: {
+            display_name: this.profiles.get(m.user_id) ?? 'Someone',
+            avatar: this.avatars.get(m.user_id) ?? null,
+          },
         })),
         invitations: this.invites
           .filter((i) => i.space_id === s.id)
@@ -443,12 +449,24 @@ export async function attachBackend(page: Page, backend: Backend): Promise<void>
       if (!uid) return json(route, 401, { message: 'permission denied' })
       if (req.method() === 'GET') {
         const name = backend.profiles.get(uid)
-        return one(name ? { id: uid, display_name: name } : null)
+        return one(
+          name ? { id: uid, display_name: name, avatar: backend.avatars.get(uid) ?? null } : null,
+        )
       }
-      const body = req.postDataJSON() as { display_name: string } | { display_name: string }[]
-      const name = Array.isArray(body) ? body[0]!.display_name : body.display_name
-      backend.profiles.set(uid, name)
-      return one({ id: uid, display_name: name })
+      type Body = { display_name: string; avatar?: string | null }
+      const raw = req.postDataJSON() as Body | Body[]
+      const body = Array.isArray(raw) ? raw[0]! : raw
+      // Same rule as the database's check constraint.
+      if (body.avatar != null && !AVATAR_KEYS.includes(body.avatar)) {
+        return json(route, 400, { code: '23514', message: 'new row violates check constraint' })
+      }
+      backend.profiles.set(uid, body.display_name)
+      if ('avatar' in body) backend.avatars.set(uid, body.avatar ?? null)
+      return one({
+        id: uid,
+        display_name: body.display_name,
+        avatar: backend.avatars.get(uid) ?? null,
+      })
     }
 
     if (url.pathname === '/rest/v1/messages') {
@@ -526,12 +544,27 @@ async function routeRealtime(page: Page, backend: Backend) {
  * Single-person helper used by the sign-in tests: a fresh backend with
  * abhi@example.com as the user (optionally already named).
  */
+const AVATAR_KEYS: (string | null)[] = [
+  'kai',
+  'rin',
+  'haru',
+  'sora',
+  'mika',
+  'jin',
+  'yuna',
+  'ren',
+  'aiko',
+  'taro',
+  'nori',
+  'emi',
+]
+
 export const ABHI_ID = '11111111-1111-4111-8111-111111111111'
 
 export async function mockSupabase(
   page: Page,
   init: { profile?: { display_name: string }; failNextSend?: Backend['failNextSend'] } = {},
-): Promise<Backend & { readonly profile: { display_name: string } | null }> {
+): Promise<Backend & { readonly profile: { display_name: string; avatar: string | null } | null }> {
   const backend = new Backend()
   backend.userFor('abhi@example.com', ABHI_ID)
   if (init.profile) backend.profiles.set(ABHI_ID, init.profile.display_name)
@@ -541,7 +574,7 @@ export async function mockSupabase(
   return Object.defineProperty(backend, 'profile', {
     get: () => {
       const name = backend.profiles.get(ABHI_ID)
-      return name ? { display_name: name } : null
+      return name ? { display_name: name, avatar: backend.avatars.get(ABHI_ID) ?? null } : null
     },
-  }) as Backend & { readonly profile: { display_name: string } | null }
+  }) as Backend & { readonly profile: { display_name: string; avatar: string | null } | null }
 }

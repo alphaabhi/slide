@@ -74,7 +74,7 @@ export function SpacesList({ userId }: { userId: string }) {
             className="flex items-center gap-3 rounded-card border border-line surface-panel p-4 transition-colors duration-[var(--duration-fast)] hover:bg-surface-high"
           >
             {s.partner ? (
-              <Avatar name={s.partner.name} side="them" />
+              <Avatar name={s.partner.name} avatar={s.partner.avatar} side="them" />
             ) : (
               <span
                 aria-hidden="true"

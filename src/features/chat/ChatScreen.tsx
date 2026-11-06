@@ -29,7 +29,8 @@ export function ChatScreen({
   justJoined?: boolean
 }) {
   const shell = useViewportFit<HTMLDivElement>()
-  const myName = useMyProfile(userId).data?.display_name ?? 'You'
+  const me = useMyProfile(userId).data
+  const myName = me?.display_name ?? 'You'
   const partnerName = space.partner?.name ?? 'them'
   const history = useMessageHistory(space.id)
   const composer = useRef<ComposerHandle | null>(null)
@@ -67,6 +68,7 @@ export function ChatScreen({
           <div className="flex -space-x-2" aria-hidden="true">
             <Avatar
               name={myName}
+              avatar={me?.avatar}
               side="you"
               size="sm"
               className="ring-2 ring-[var(--color-canvas)]"
@@ -74,6 +76,7 @@ export function ChatScreen({
             {space.partner ? (
               <Avatar
                 name={space.partner.name}
+                avatar={space.partner.avatar}
                 side="them"
                 size="sm"
                 className="ring-2 ring-[var(--color-canvas)]"
