@@ -14,9 +14,9 @@ import { mergeMessages, type Message } from './model'
 import { useViewportFit } from './useViewportFit'
 
 const STARTERS = [
-  'What’s the best thing that happened to you this week?',
-  'Coffee, chai or neither?',
-  'What were you doing before we matched?',
+  'What’s something you’ve always wanted to do but need the right partner in crime for?',
+  'What’s more seductive: a brilliant mind, effortless confidence or wicked humour?',
+  'What’s your most dangerously charming quality?',
 ]
 
 export function ChatScreen({

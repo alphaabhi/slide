@@ -18,7 +18,7 @@ export function SpacePreview() {
           />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="truncate font-display font-bold">Not the Hinge chat</p>
+          <p className="truncate font-display font-bold">All banter welcome</p>
           <p className="font-meta text-xs text-fg-muted">You and Meera</p>
         </div>
         <span className="label-meta rounded-pill bg-gold px-2 py-1 text-[0.6875rem] text-gold-ink">

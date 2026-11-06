@@ -81,14 +81,18 @@ test('two people chat live: messages arrive instantly, in order, and persist', a
 
   // Empty state with conversation starters
   await expect(meera.getByRole('heading', { name: 'Say hi to Abhi' })).toBeVisible()
-  await meera.getByRole('button', { name: 'Coffee, chai or neither?' }).click()
+  await meera
+    .getByRole('button', { name: 'What’s your most dangerously charming quality?' })
+    .click()
   await expect(meera.getByRole('textbox', { name: 'Message Abhi' })).toHaveValue(
-    'Coffee, chai or neither?',
+    'What’s your most dangerously charming quality?',
   )
   await meera.getByRole('button', { name: 'Send message' }).click()
 
   // Abhi (on desktop) sees it live, then replies with Enter; Shift+Enter makes a new line
-  await expect(list(abhi).getByText('Coffee, chai or neither?')).toBeVisible({ timeout: 5_000 })
+  await expect(list(abhi).getByText('What’s your most dangerously charming quality?')).toBeVisible({
+    timeout: 5_000,
+  })
   const box = abhi.getByRole('textbox', { name: 'Message Meera' })
   await box.fill('chai, obviously')
   await box.press('Enter')
@@ -107,7 +111,7 @@ test('two people chat live: messages arrive instantly, in order, and persist', a
 
   // Same order for both, and it survives a refresh
   const expected = [
-    'Coffee, chai or neither?',
+    'What’s your most dangerously charming quality?',
     'chai, obviously',
     'line one\nline two',
     'नमस्ते 🌸 très bien',
