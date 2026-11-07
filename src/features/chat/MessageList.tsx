@@ -1,8 +1,8 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { Icon } from '@/components/ui/Icon'
-import { MessageBubble } from '@/components/ui/MessageBubble'
 import { Spinner } from '@/components/ui/Spinner'
-import { formatTime, toRows, type ChatMessage, type TimelineExtra } from './model'
+import { ChatBubble } from './ChatBubble'
+import { toRows, type ChatMessage, type TimelineExtra } from './model'
 
 const NEAR_BOTTOM_PX = 120
 const NO_EXTRAS: TimelineExtra[] = []
@@ -140,12 +140,8 @@ export function MessageList({
               ) : (
                 <li key={row.key}>
                   {row.message.mine ? null : <span className="sr-only">They said: </span>}
-                  <MessageBubble
-                    side={row.message.mine ? 'you' : 'them'}
-                    body={row.message.body}
-                    time={formatTime(row.message.createdAt)}
-                    dateTime={row.message.createdAt}
-                    status={row.message.mine ? row.message.status : undefined}
+                  <ChatBubble
+                    message={row.message}
                     isLast={row.isLastInRun}
                     author={row.message.mine ? me : them}
                     onRetry={

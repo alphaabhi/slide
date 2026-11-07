@@ -19,6 +19,12 @@ Viewports: iPhone SE (375×667), Pixel 7 (412×915), tablet 768×1024, desktop 1
 | Accessibility | axe via Playwright                 | WCAG 2.1 AA; serious or critical violations fail the build                            |
 | Performance   | Lighthouse (from stage 7)          | Mobile perf ≥ 90, a11y ≥ 95 targets                                                   |
 
+## Verified — 2026-11-07 (Release A: reactions, replies, emoji, links — branch `chat-feel`)
+
+- `npm run check`: **158 tests**, incl. 10 new database tests (replies only within the same space; old 3-argument sends still work; one reaction per person, replace/remove; multi-part emoji allowed, text/markup refused; outsiders see and do nothing; no direct writes; closed spaces; deletion; publication) and link detection (http/https/www only; trailing punctuation and brackets; no other schemes).
+- Playwright: **86 pass** (54 skipped by design). New `e2e/reactions.spec.ts` uses real touch events (Chromium touch emulation): double-tap ❤️ and undo, hold for the menu (9 items), swipe right to reply, quote seen by both; on a computer: double-click, right-click → "+" picker → 🍕, hover buttons reached by keyboard, tapping a quote loads 70+ older messages and scrolls back to the original; links open in a new tab and `javascript:` stays text; the emoji picker searches, inserts at the cursor and remembers recents. Accessibility checked on the menu and picker (the emoji library's own grid has a minor row-numbering quirk, excluded and noted).
+- Note: the headless test browser reports a touchscreen even for "computer" contexts, so the hover-only buttons are exercised by keyboard focus; their look was checked in screenshots.
+
 ## Verified — 2026-11-06 (stage 6: games, branch `activities`)
 
 - `npm run check`: **144 tests**, incl. 18 new database tests for games (start rules, one open per game, Question of the Day once a day, validation; the first answer visible only to its author; the second reveals both to both; skip keeps an answer hidden; outsiders and signed-out users see and do nothing; no direct writes; closed spaces; deletion with the space; rounds published, answers not), prompt-list checks (unique keys, lengths, no repeats until a full cycle) and timeline placement of game cards.

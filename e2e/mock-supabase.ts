@@ -28,6 +28,14 @@ export interface MockMessage {
   client_id: string
   body: string
   created_at: string
+  reply_to?: string | null
+}
+
+export interface MockReaction {
+  message_id: string
+  user_id: string
+  space_id: string
+  emoji: string | null
 }
 
 export interface MockRound {
@@ -77,6 +85,7 @@ export class Backend {
   invites: MockInvite[] = []
   messages: MockMessage[] = []
   rounds: MockRound[] = []
+  reactions: MockReaction[] = []
   responses: MockResponse[] = []
   sockets = new Set<LiveSocket>()
   /** When true, live updates are down (simulates a dropped websocket). */
@@ -103,7 +112,7 @@ export class Backend {
     this.broadcast('activity_rounds', type, r)
   }
 
-  private broadcast(table: string, type: string, m: { space_id: string; created_at: string }) {
+  broadcast(table: string, type: string, m: { space_id: string; created_at: string }) {
     if (this.liveDown) return
     const space = this.spaces.get(m.space_id)
     for (const sock of this.sockets) {
@@ -149,7 +158,7 @@ export class Backend {
   }
 
   /** Insert a message directly (as if sent from another device). */
-  addMessage(spaceId: string, senderId: string, body: string): MockMessage {
+  addMessage(spaceId: string, senderId: string, body: string, replyTo?: string): MockMessage {
     const m: MockMessage = {
       id: this.newId(),
       space_id: spaceId,
@@ -157,6 +166,7 @@ export class Backend {
       client_id: crypto.randomUUID(),
       body,
       created_at: this.nextTimestamp(),
+      reply_to: replyTo ?? null,
     }
     this.messages.push(m)
     this.publish(m)
@@ -170,6 +180,24 @@ export class Backend {
       .filter((m) => m.space_id === spaceId && (!before || m.created_at < before))
       .sort((a, b) => b.created_at.localeCompare(a.created_at) || b.id.localeCompare(a.id))
       .slice(0, limit)
+      .map((m) => this.withReactions(m))
+  }
+
+  withReactions(m: MockMessage) {
+    return {
+      ...m,
+      reply_to: m.reply_to ?? null,
+      message_reactions: this.reactions
+        .filter((r) => r.message_id === m.id)
+        .map(({ user_id, emoji }) => ({ user_id, emoji })),
+    }
+  }
+
+  /** One message by id, if this person can see it (used to show a quoted reply). */
+  messageById(uid: string, id: string) {
+    const m = this.messages.find((x) => x.id === id)
+    const space = m && this.spaces.get(m.space_id)
+    return m && space?.members.some((x) => x.user_id === uid) ? m : null
   }
 
   userFor(email: string, id?: string): string {
@@ -305,6 +333,9 @@ export class Backend {
         const body = String(args.p_body ?? '').trim()
         if (!body) fail('message_empty')
         if (body.length > 4000) fail('message_too_long')
+        const replyTo = (args.p_reply_to as string | undefined) ?? null
+        if (replyTo && !this.messages.some((x) => x.id === replyTo && x.space_id === spaceId))
+          fail('reply_invalid')
         const m: MockMessage = {
           id: this.newId(),
           space_id: spaceId,
@@ -312,10 +343,36 @@ export class Backend {
           client_id: clientId,
           body,
           created_at: this.nextTimestamp(),
+          reply_to: replyTo,
         }
         this.messages.push(m)
         this.publish(m)
         return m
+      }
+      case 'react_to_message': {
+        const msg = this.messages.find((m) => m.id === args.p_message_id)
+        const space = msg && this.spaces.get(msg.space_id)
+        if (!uid || !msg || !space?.members.some((m) => m.user_id === uid))
+          return fail('not_member')
+        if (space.status !== 'active') fail('space_closed')
+        const emoji = (args.p_emoji as string | null) || null
+        if (emoji && (emoji.length > 16 || /[\p{L}\p{N}\s<>&"'`\\]/u.test(emoji)))
+          fail('reaction_invalid')
+        this.reactions = this.reactions.filter(
+          (r) => !(r.message_id === msg.id && r.user_id === uid),
+        )
+        const row: MockReaction = {
+          message_id: msg.id,
+          user_id: uid,
+          space_id: msg.space_id,
+          emoji,
+        }
+        this.reactions.push(row)
+        this.broadcast('message_reactions', 'UPDATE', {
+          ...row,
+          created_at: new Date().toISOString(),
+        })
+        return row
       }
       case 'start_round': {
         const space = this.spaces.get(args.p_space_id as string)
@@ -597,6 +654,8 @@ export async function attachBackend(page: Page, backend: Backend): Promise<void>
 
     if (url.pathname === '/rest/v1/messages') {
       if (!uid) return json(route, 401, { message: 'permission denied' })
+      const idFilter = url.searchParams.get('id')?.replace(/^eq\./, '')
+      if (idFilter) return one(backend.messageById(uid, idFilter))
       const spaceId = url.searchParams.get('space_id')?.replace(/^eq\./, '') ?? ''
       const before = url.searchParams.get('created_at')?.replace(/^lt\./, '')
       const limit = Number(url.searchParams.get('limit') ?? 50)

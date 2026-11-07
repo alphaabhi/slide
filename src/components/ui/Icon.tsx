@@ -14,6 +14,14 @@ const paths = {
     </>
   ),
   close: <path d="M6 6l12 12M18 6 6 18" />,
+  reply: <path d="M10 8 5 12.5l5 4.5M5 12.5h9a5 5 0 0 1 5 5V19" />,
+  smile: (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M8.5 14.5a4.5 4.5 0 0 0 7 0M9 9.5h.01M15 9.5h.01" />
+    </>
+  ),
+  plus: <path d="M12 5v14M5 12h14" />,
   back: <path d="M19 12H6M12 18l-6-6 6-6" />,
   more: (
     <>

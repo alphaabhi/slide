@@ -9,6 +9,49 @@ export interface Message {
   client_id: string
   body: string
   created_at: string
+  /** The message this one replies to, if any. */
+  reply_to?: string | null
+  /** Embedded on fetch; kept up to date by live updates. emoji null = removed. */
+  message_reactions?: Reaction[]
+}
+
+export interface Reaction {
+  user_id: string
+  emoji: string | null
+}
+
+/** The six reactions offered on long-press; ❤️ is also the double-tap. */
+export const QUICK_REACTIONS = ['❤️', '😂', '😮', '😢', '🔥', '👍'] as const
+export const DOUBLE_TAP_REACTION = '❤️'
+
+export interface ReactionSummary {
+  emoji: string
+  count: number
+  mine: boolean
+  /** "you", "Meera" or "you and Meera" — for screen readers and tooltips. */
+  who: string
+}
+
+/** Groups live reactions by emoji, in the order first used. */
+export function summarizeReactions(
+  reactions: Reaction[] | undefined,
+  myId: string,
+  partnerName: string,
+): ReactionSummary[] {
+  const out: ReactionSummary[] = []
+  for (const r of reactions ?? []) {
+    if (!r.emoji) continue
+    const mine = r.user_id === myId
+    const existing = out.find((s) => s.emoji === r.emoji)
+    if (existing) {
+      existing.count++
+      existing.mine ||= mine
+      existing.who = 'you and ' + partnerName
+    } else {
+      out.push({ emoji: r.emoji, count: 1, mine, who: mine ? 'you' : partnerName })
+    }
+  }
+  return out
 }
 
 export type OutboxStatus = 'sending' | 'failed'
@@ -21,6 +64,8 @@ export interface OutboxItem {
   status: OutboxStatus
   /** Plain-language reason, for failures the person can't fix by retrying. */
   error?: string
+  /** Server id of the message being replied to. */
+  replyTo?: string
 }
 
 export interface ChatMessage {
@@ -31,6 +76,10 @@ export interface ChatMessage {
   status?: 'sending' | 'sent' | 'failed'
   error?: string
   clientId: string
+  /** Server id (confirmed messages only): needed to reply or react. */
+  id?: string
+  replyTo?: string
+  reactions?: Reaction[]
 }
 
 /** Server messages (any order, possibly duplicated) + unconfirmed local ones → one ordered list. */
@@ -52,6 +101,9 @@ export function mergeMessages(
       createdAt: m.created_at,
       status: m.sender_id === myId ? 'sent' : undefined,
       clientId: m.client_id,
+      id: m.id,
+      replyTo: m.reply_to ?? undefined,
+      reactions: m.message_reactions,
     })
   }
   confirmed.sort((a, b) => a.createdAt.localeCompare(b.createdAt) || a.key.localeCompare(b.key))
@@ -66,6 +118,7 @@ export function mergeMessages(
       status: o.status,
       error: o.error,
       clientId: o.clientId,
+      replyTo: o.replyTo,
     }))
   // Unconfirmed messages always sit at the end, where the person just typed them.
   return [...confirmed, ...pending]

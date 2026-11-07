@@ -85,6 +85,14 @@ Index `(space_id, created_at desc, id desc)` for history pages; `(sender_id, cre
 
 **Access:** members read their space's rounds; answers are readable by their author, and by the other member only after the reveal. No direct writes. Rounds are in the `supabase_realtime` publication; answers are not.
 
+### Reactions and replies (Release A) — `20261110000000_reactions_replies.sql`
+
+`messages.reply_to` → the quoted message (same space, checked by `send_message`; `on delete set null`).
+
+`message_reactions`: `message_id`, `user_id`, `space_id` (copied for access checks/live filtering), `emoji` (null = removed), `updated_at`; one row per person per message. Written only by `react_to_message(message, emoji)` (members; active space; null removes). Members read their space's reactions. In the `supabase_realtime` publication.
+
+`send_message(space, client_id, body, reply_to default null)` replaces the 3-argument version (calls with three named arguments still resolve).
+
 ## Planned
 
 | Table | Stage |

@@ -11,7 +11,17 @@ import { useMyProfile } from '@/features/profile/api'
 import { spaceLabel, type Space } from '@/features/spaces/api'
 import { LeaveSpace } from '@/features/spaces/LeaveSpace'
 import { cn } from '@/lib/cn'
-import { useLiveMessages, useMessageHistory, useOutbox, type LiveStatus } from './api'
+import { useQueryClient } from '@tanstack/react-query'
+import {
+  findMessage,
+  useLiveMessages,
+  useMessageHistory,
+  useOutbox,
+  useReact,
+  type LiveStatus,
+} from './api'
+import { ChatActionsProvider, type ChatActions } from './ChatBubble'
+import type { ChatMessage } from './model'
 import { Composer, type ComposerHandle } from './Composer'
 import { MessageList } from './MessageList'
 import { mergeMessages, type Message, type TimelineExtra } from './model'
@@ -52,6 +62,61 @@ export function ChatScreen({
   )
   const loadOlder = useCallback(() => void history.fetchNextPage(), [history])
   const closed = space.phase === 'closed'
+
+  // ---- Replies, reactions, jumping to a quoted message
+  const qc = useQueryClient()
+  const reactMutation = useReact(space.id, userId)
+  const [replyTo, setReplyTo] = useState<{ id: string; name: string; text: string } | null>(null)
+  const [highlightedId, setHighlightedId] = useState<string | null>(null)
+  const toastRef = useRef<number | undefined>(undefined)
+  const reply = useCallback(
+    (m: ChatMessage) => {
+      if (!m.id) return
+      setReplyTo({ id: m.id, name: m.mine ? 'yourself' : partnerName, text: m.body })
+      composer.current?.focus()
+    },
+    [partnerName],
+  )
+  const jumpTo = useCallback(
+    async (id: string) => {
+      // Load older pages until the quoted message is there (it may be far back).
+      for (let i = 0; i < 20 && !findMessage(qc, space.id, id); i++) {
+        if (!history.hasNextPage) break
+        await history.fetchNextPage()
+      }
+      window.setTimeout(() => {
+        const el = document.getElementById(`msg-${id}`)
+        if (!el) return
+        el.scrollIntoView({ block: 'center', behavior: 'smooth' })
+        setHighlightedId(id)
+        window.clearTimeout(toastRef.current)
+        toastRef.current = window.setTimeout(() => setHighlightedId(null), 1800)
+      }, 80)
+    },
+    [qc, space.id, history],
+  )
+  const actions = useMemo<ChatActions>(
+    () => ({
+      spaceId: space.id,
+      myId: userId,
+      partnerName,
+      closed,
+      react: (messageId, emoji) => reactMutation.mutate({ messageId, emoji }),
+      reply,
+      jumpTo: (id) => void jumpTo(id),
+      highlightedId,
+    }),
+    // reactMutation.mutate is stable.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [space.id, userId, partnerName, closed, reply, jumpTo, highlightedId],
+  )
+  const send = useCallback(
+    (body: string) => {
+      outbox.send(body, replyTo?.id)
+      setReplyTo(null)
+    },
+    [outbox, replyTo],
+  )
 
   // "You're in" greets you for a few seconds, then gets out of the way.
   // (An empty chat already says "Say hi", so it only shows when there's history.)
@@ -196,27 +261,29 @@ export function ChatScreen({
           </button>
         </div>
       ) : (
-        <MessageList
-          messages={messages}
-          hasOlder={!!history.hasNextPage}
-          loadingOlder={history.isFetchingNextPage}
-          onLoadOlder={loadOlder}
-          onRetry={outbox.retry}
-          me={meAuthor}
-          them={themAuthor}
-          extras={extras}
-          renderExtra={renderRound}
-          empty={
-            <EmptyChat
-              partnerName={partnerName}
-              closed={closed}
-              spaceId={space.id}
-              onPick={(t) => composer.current?.insert(t)}
-              onPlay={() => void play('this_or_that')}
-              playing={starting !== null}
-            />
-          }
-        />
+        <ChatActionsProvider value={actions}>
+          <MessageList
+            messages={messages}
+            hasOlder={!!history.hasNextPage}
+            loadingOlder={history.isFetchingNextPage}
+            onLoadOlder={loadOlder}
+            onRetry={outbox.retry}
+            me={meAuthor}
+            them={themAuthor}
+            extras={extras}
+            renderExtra={renderRound}
+            empty={
+              <EmptyChat
+                partnerName={partnerName}
+                closed={closed}
+                spaceId={space.id}
+                onPick={(t) => composer.current?.insert(t)}
+                onPlay={() => void play('this_or_that')}
+                playing={starting !== null}
+              />
+            }
+          />
+        </ChatActionsProvider>
       )}
 
       {closed ? (
@@ -230,7 +297,9 @@ export function ChatScreen({
           <Composer
             spaceId={space.id}
             partnerName={partnerName}
-            onSend={outbox.send}
+            onSend={send}
+            replyTo={replyTo ? { name: replyTo.name, text: replyTo.text } : undefined}
+            onCancelReply={() => setReplyTo(null)}
             onReady={(h) => (composer.current = h)}
             leading={<PlaySheet rounds={rounds} myId={userId} starting={starting} onPlay={play} />}
           />

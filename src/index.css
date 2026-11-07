@@ -313,3 +313,46 @@
     animation: none;
   }
 }
+
+/* ---------- Reactions and replies ---------- */
+@keyframes heart-burst {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  35% {
+    opacity: 1;
+    transform: scale(1.25);
+  }
+  70% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.1) translateY(-8px);
+  }
+}
+@keyframes highlight-flash {
+  0%,
+  60% {
+    box-shadow: 0 0 0 3px var(--color-gold);
+  }
+  100% {
+    box-shadow: 0 0 0 3px transparent;
+  }
+}
+@layer components {
+  .slide-heart-burst {
+    animation: heart-burst 700ms var(--ease-out) both;
+  }
+  .slide-highlight {
+    animation: highlight-flash 1.6s var(--ease-out) both;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .slide-heart-burst {
+    animation: none;
+    opacity: 0;
+  }
+}

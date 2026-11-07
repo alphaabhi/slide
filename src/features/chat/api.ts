@@ -1,5 +1,7 @@
 import {
   useInfiniteQuery,
+  useMutation,
+  useQuery,
   useQueryClient,
   type InfiniteData,
   type QueryClient,
@@ -8,10 +10,11 @@ import type { RealtimeChannel } from '@supabase/supabase-js'
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react'
 import { refreshRounds } from '@/features/activities/api'
 import { getSupabase } from '@/lib/supabase'
-import type { Message, OutboxItem } from './model'
+import type { Message, OutboxItem, Reaction } from './model'
 
 export const PAGE_SIZE = 50
-const COLUMNS = 'id, space_id, sender_id, client_id, body, created_at'
+const COLUMNS =
+  'id, space_id, sender_id, client_id, body, created_at, reply_to, message_reactions(user_id, emoji)'
 
 export const messagesKey = (spaceId: string) => ['messages', spaceId] as const
 type Pages = InfiniteData<Message[], string | null>
@@ -48,12 +51,105 @@ export function useMessageHistory(spaceId: string) {
 export function addToCache(qc: QueryClient, spaceId: string, incoming: Message[]) {
   qc.setQueryData<Pages>(messagesKey(spaceId), (data) => {
     if (!data) return data
-    const known = new Set(data.pages.flat().map((m) => m.client_id))
+    const byClient = new Map(incoming.map((m) => [m.client_id, m]))
+    const known = new Set<string>()
+    let changed = false
+    // Known messages: take newer reactions (a catch-up after a drop brings them).
+    const pages = data.pages.map((page) =>
+      page.map((m) => {
+        known.add(m.client_id)
+        const next = byClient.get(m.client_id)
+        if (!next?.message_reactions || sameReactions(m.message_reactions, next.message_reactions))
+          return m
+        changed = true
+        return { ...m, message_reactions: next.message_reactions }
+      }),
+    )
     const fresh = incoming.filter((m) => !known.has(m.client_id))
-    if (fresh.length === 0) return data
-    const [first = [], ...rest] = data.pages
+    if (fresh.length === 0 && !changed) return data
+    const [first = [], ...rest] = pages
     return { ...data, pages: [[...fresh, ...first], ...rest] }
   })
+}
+
+function sameReactions(a: Reaction[] = [], b: Reaction[] = []) {
+  if (a.length !== b.length) return false
+  return a.every((r) => b.some((x) => x.user_id === r.user_id && x.emoji === r.emoji))
+}
+
+/** A reaction was set, changed or removed: update that message in place. */
+export function applyReaction(
+  qc: QueryClient,
+  spaceId: string,
+  row: { message_id: string; user_id: string; emoji: string | null },
+) {
+  qc.setQueryData<Pages>(messagesKey(spaceId), (data) => {
+    if (!data) return data
+    let found = false
+    const pages = data.pages.map((page) =>
+      page.map((m) => {
+        if (m.id !== row.message_id) return m
+        found = true
+        const others = (m.message_reactions ?? []).filter((r) => r.user_id !== row.user_id)
+        return { ...m, message_reactions: [...others, { user_id: row.user_id, emoji: row.emoji }] }
+      }),
+    )
+    return found ? { ...data, pages } : data
+  })
+}
+
+/** React to a message (null removes your reaction). Shows instantly; reverts if it fails. */
+export function useReact(spaceId: string, myId: string) {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (a: { messageId: string; emoji: string | null }) => {
+      const { error } = await getSupabase().rpc('react_to_message', {
+        p_message_id: a.messageId,
+        p_emoji: a.emoji,
+      })
+      if (error) throw error
+    },
+    onMutate: (a) => {
+      const before = findMessage(qc, spaceId, a.messageId)?.message_reactions
+      applyReaction(qc, spaceId, { message_id: a.messageId, user_id: myId, emoji: a.emoji })
+      return { before }
+    },
+    onError: (_e, a, ctx) => {
+      const mineBefore = ctx?.before?.find((r) => r.user_id === myId)?.emoji ?? null
+      applyReaction(qc, spaceId, { message_id: a.messageId, user_id: myId, emoji: mineBefore })
+    },
+  })
+}
+
+export function findMessage(qc: QueryClient, spaceId: string, id: string): Message | undefined {
+  return qc
+    .getQueryData<Pages>(messagesKey(spaceId))
+    ?.pages.flat()
+    .find((m) => m.id === id)
+}
+
+/**
+ * The message a reply quotes: from what's already loaded, or fetched on its own
+ * (it may be far back in the history).
+ */
+export function useQuotedMessage(spaceId: string, id: string | undefined) {
+  const qc = useQueryClient()
+  const cached = id ? findMessage(qc, spaceId, id) : undefined
+  const q = useQuery({
+    queryKey: ['message', id],
+    enabled: !!id && !cached,
+    staleTime: Infinity,
+    queryFn: async () => {
+      const { data, error } = await getSupabase()
+        .from('messages')
+        .select('id, sender_id, body, client_id, created_at')
+        .eq('id', id!)
+        .maybeSingle<Pick<Message, 'id' | 'sender_id' | 'body' | 'client_id' | 'created_at'>>()
+      if (error) throw error
+      return data
+    },
+  })
+  return cached ?? q.data ?? undefined
 }
 
 /** Fetch the newest page and merge it in: catches anything missed while disconnected. */
@@ -67,11 +163,13 @@ export async function sendMessage(
   spaceId: string,
   clientId: string,
   body: string,
+  replyTo?: string,
 ): Promise<Message> {
   const { data, error } = await getSupabase().rpc('send_message', {
     p_space_id: spaceId,
     p_client_id: clientId,
     p_body: body,
+    ...(replyTo ? { p_reply_to: replyTo } : {}),
   })
   if (error) throw error
   return data as Message
@@ -127,6 +225,26 @@ export function useLiveMessages(spaceId: string, onIncoming: (m: Message) => voi
           const m = payload.new as Message
           addToCache(qc, spaceId, [m])
           onIncomingRef.current(m)
+        },
+      )
+      // A reaction was added, changed or removed.
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'message_reactions',
+          filter: `space_id=eq.${spaceId}`,
+        },
+        (payload) => {
+          const r = payload.new as { message_id?: string; user_id?: string; emoji?: string | null }
+          if (r?.message_id && r.user_id) {
+            applyReaction(qc, spaceId, {
+              message_id: r.message_id,
+              user_id: r.user_id,
+              emoji: r.emoji ?? null,
+            })
+          }
         },
       )
       // A game started, answered, revealed or skipped: refetch (answers are never streamed).
@@ -218,6 +336,7 @@ const permanentErrors: Record<string, string> = {
   message_too_long: 'Too long. Messages can be up to 4,000 characters.',
   message_empty: 'Empty messages can’t be sent.',
   rate_limited: 'You’re sending very fast. Wait a moment, then tap Retry.',
+  reply_invalid: 'The message you replied to isn’t available any more.',
 }
 
 /**
@@ -244,12 +363,12 @@ export function useOutbox(spaceId: string, onConfirmed: (m: Message) => void) {
   }, [items, spaceId])
 
   const deliver = useCallback(
-    async (item: Pick<OutboxItem, 'clientId' | 'body'>) => {
+    async (item: Pick<OutboxItem, 'clientId' | 'body' | 'replyTo'>) => {
       if (inFlight.current.has(item.clientId)) return // ignore double taps on Retry
       inFlight.current.add(item.clientId)
       dispatch({ type: 'status', clientId: item.clientId, status: 'sending' })
       try {
-        const saved = await sendMessage(spaceId, item.clientId, item.body)
+        const saved = await sendMessage(spaceId, item.clientId, item.body, item.replyTo)
         addToCache(qc, spaceId, [saved])
         dispatch({ type: 'remove', clientId: item.clientId })
         onConfirmed(saved)
@@ -272,12 +391,13 @@ export function useOutbox(spaceId: string, onConfirmed: (m: Message) => void) {
   )
 
   const send = useCallback(
-    (body: string) => {
+    (body: string, replyTo?: string) => {
       const item: OutboxItem = {
         clientId: crypto.randomUUID(),
         body,
         createdAt: new Date().toISOString(),
         status: 'sending',
+        ...(replyTo ? { replyTo } : {}),
       }
       dispatch({ type: 'add', item })
       void deliver(item)

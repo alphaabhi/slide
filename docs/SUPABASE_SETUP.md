@@ -15,6 +15,7 @@ Supabase dashboard → **SQL Editor** → **New query**. Paste the contents of e
 | `20261107000000_messages.sql`               | 4       | Run (2026-11-06) |
 | `20261108000000_avatars.sql`                | avatars | Run (2026-11-06) |
 | `20261109000000_activities.sql`             | 6       | Run (2026-11-06) |
+| `20261110000000_reactions_replies.sql`      | A       | **To run**       |
 
 Never edit a migration that has already been run; changes always come as a new file.
 
